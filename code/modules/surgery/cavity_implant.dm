@@ -20,7 +20,7 @@
 		BODY_ZONE_CHEST,
 		BODY_ZONE_HEAD,
 	)
-	restricted_speciestypes = list(/datum/species/kidan, /datum/species/wryn, /datum/species/plasmaman)
+	restricted_speciestypes = list(/datum/species/kidan, /datum/species/plasmaman)
 
 /datum/surgery/cavity_implant/soft
 	desc = "Имплантация объекта в полость, не защищённую костями."
@@ -56,7 +56,7 @@
 		/datum/surgery_step/finish_bone,
 		/datum/surgery_step/generic/cauterize,
 	)
-	target_speciestypes = list(/datum/species/kidan, /datum/species/wryn)
+	target_speciestypes = list(/datum/species/kidan,)
 	restricted_speciestypes = null
 	possible_locs = list(
 		BODY_ZONE_CHEST,
@@ -313,15 +313,6 @@
 	time = 3.2 SECONDS
 
 /datum/surgery_step/cavity/place_item/tool_check(mob/user, obj/item/tool)
-	if(istype(tool, /obj/item/disk/nuclear))
-		to_chat(user, span_danger("Центральное Командование убьёт вас, если узнает, что вы имплантировали ядерный диск в чьё-то тело!"))
-		return FALSE
-
-	var/obj/item/disk/nuclear/datdisk = locate() in tool
-	if(datdisk)
-		to_chat(user, span_danger("Центральное Командование убьёт вас, если узнает, что вы имплантировали ядерный диск в чьё-то тело. Особенно, если оно внутри [tool.declent_ru(GENITIVE)]!"))
-		return FALSE
-
 	if(istype(tool, /obj/item/organ))
 		to_chat(user, span_warning("Неподходящий тип операции для трансплантации органов."))
 		return FALSE

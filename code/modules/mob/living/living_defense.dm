@@ -90,13 +90,6 @@
 		)
 	return shock_damage
 
-/mob/living/blob_vore_act(obj/structure/blob/special/core/voring_core)
-	. = ..()
-	if(HAS_TRAIT(src, TRAIT_BLOB_ZOMBIFIED) || QDELETED(src))
-		return FALSE
-	if(stat == DEAD)
-		forceMove(voring_core)
-
 /mob/living/emp_act(severity)
 	..()
 	for(var/obj/O in contents)
@@ -443,11 +436,6 @@
 /mob/living/proc/get_grab_upgrade_time(mob/living/grabber)
 	if(!grabber.mind)
 		return GRAB_UPGRADE_TIME
-
-	var/datum/antagonist/vampire/vampire = grabber.mind.has_antag_datum(/datum/antagonist/vampire)
-	var/datum/vampire_passive/upgraded_grab/vampire_grab = vampire?.get_ability(/datum/vampire_passive/upgraded_grab)
-	if(vampire_grab)
-		return vampire_grab.grab_speed
 
 	var/mod = 1
 	var/list/mods = list()

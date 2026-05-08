@@ -2,7 +2,6 @@
 	mob_type_allowed_typecache = /mob/living
 	mob_type_blacklist_typecache = list(
 		/mob/living/carbon/brain,	// nice try
-		/mob/living/captive_brain,
 		/mob/living/silicon,
 		/mob/living/simple_animal/bot,
 		/mob/living/simple_animal/slime,
@@ -106,15 +105,11 @@
 
 	mob_type_blacklist_typecache = list(
 		/mob/living/carbon/brain,
-		/mob/living/captive_brain,
 	)
 
 /datum/emote/living/deathgasp/select_message_type(mob/user, msg, intentional)
 	if(ishuman(user))
 		. = user.dna?.species?.death_message
-	else if(isalien(user))
-		var/mob/living/carbon/alien/alien = user
-		. = alien.death_message
 	else if(istype(user, /mob/living/simple_animal))
 		var/mob/living/simple_animal/animal = user
 		. = animal.deathmessage	// TODO: translate all death messages
@@ -130,10 +125,6 @@
 	if(ishuman(user) && user.dna?.species)
 		var/mob/living/carbon/human/human = user
 		. = safepick(human.dna.species.death_sounds)
-
-	else if(isalien(user))
-		var/mob/living/carbon/alien/alien = user
-		. = alien.death_sound
 
 	else if(issilicon(user))
 		var/mob/living/silicon/silicon = user
@@ -263,7 +254,6 @@
 		// Humans and silicons get specialized scream.
 		/mob/living/carbon/human,
 		/mob/living/silicon,
-		/mob/living/captive_brain,
 		/mob/living/simple_animal/slime,
 	)
 	vary = TRUE
@@ -423,7 +413,6 @@
 	emote_type = EMOTE_AUDIBLE|EMOTE_MOUTH
 	mob_type_blacklist_typecache = list(
 		/mob/living/carbon/brain,
-		/mob/living/captive_brain,
 		/mob/living/simple_animal/slime,
 	)
 
@@ -462,7 +451,6 @@
 	message = null
 	mob_type_blacklist_typecache = list(
 		/mob/living/carbon/brain,	// nice try
-		/mob/living/captive_brain,
 	)
 
 	// Custom emotes should be able to be forced out regardless of context.

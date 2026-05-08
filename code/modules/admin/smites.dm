@@ -166,42 +166,6 @@
 	target.set_nutrition(nutrition)
 	to_chat(target, span_userdanger("Вы чувствуете [nutrition < old_nutrition ? "голод" : "что съели слишком много"]. Боги наказали вас за [reason]!"))
 
-// MARK: Cluwne
-/datum/smite/cluwne
-	name = SMITE_CLUWNE
-	desc = "Извратите сущность грешника, сделав его Клуней."
-	logmsg = "cluwned."
-	category = SMITE_CATEGORY_TRANSFORMATION
-
-/datum/smite/cluwne/apply_effect(mob/living/carbon/human/target, reason)
-	to_chat(target, span_userdanger("Вы чувствуете как ваша сущность координально меняется. Боги наказали вас за [reason]!"))
-	target.makeCluwne()
-	ADD_TRAIT(target, TRAIT_NO_CLONE, ADMIN_TRAIT)
-
-// MARK: Cookie (off)
-/datum/smite/cookie
-	name = SMITE_COOKIE
-	desc = "Выдайте жертве печенье с выбранным веществом, которое она не сможет выбросить."
-	category = SMITE_CATEGORY_CONTROL
-
-/datum/smite/cookie/apply_effect(mob/living/carbon/human/target, reason)
-	target.makeCluwne()
-	ADD_TRAIT(target, TRAIT_NO_CLONE, ADMIN_TRAIT)
-
-	var/obj/item/reagent_containers/food/snacks/cookie/empty/evilcookie = new()
-	var/datum/reagent/reagent = tgui_input_list(usr, "Выберите реагент который будет находиться в печенье.", "Выбор вещества", GLOB.typecache_reagent)
-	var/amount = tgui_input_number(usr, "Выберите количество вещества в печенье.", "Выбор количества", 10, 10000, 0)
-	var/id = reagent::id ? reagent::id : "mutagen"
-	evilcookie.volume = max(100, amount)
-	evilcookie.reagents.add_reagent(id, amount)
-	evilcookie.bitesize = evilcookie.volume
-	evilcookie.item_flags |= DROPDEL
-	ADD_TRAIT(evilcookie, TRAIT_NODROP, ADMIN_TRAIT)
-	target.drop_l_hand()
-	target.equip_to_slot_or_del(evilcookie, ITEM_SLOT_HAND_LEFT)
-	to_chat(target, span_userdanger("В ваших руках появляется печенье. По воле божьей, вы должны его съесть. Это наказание за [reason]!"))
-	logmsg = "an antidrop cookie with [reagent] units of [id]."
-
 // MARK: Hunter
 /datum/smite/hunter
 	name = SMITE_HUNTER
@@ -212,43 +176,6 @@
 /datum/smite/hunter/apply_effect(mob/living/carbon/human/target, reason) // silent
 	ADD_TRAIT(target, TRAIT_NO_CLONE, ADMIN_TRAIT)
 	usr.client.create_eventmob_for(target, 1)
-
-// MARK: Hunter-traitor
-/datum/smite/traitor_hunter
-	name = SMITE_TRAITORHUNTER
-	desc = "Отправьте за грешником агента \"Синдиката\", созданного среди экипажа."
-	logmsg = "crew traitor."
-	category = SMITE_CATEGORY_DEATH
-
-/datum/smite/traitor_hunter/apply_effect(mob/living/carbon/human/target, reason) // silent
-	var/list/possible_traitors = list()
-	for(var/mob/living/carbon/human/player in GLOB.alive_player_list)
-		if(player.mind.special_role)
-			continue
-
-		if(ismindshielded(player))
-			continue
-
-		if(!(ROLE_TRAITOR in player.client.prefs.be_special) || jobban_isbanned(player, ROLE_TRAITOR) || jobban_isbanned(player, ROLE_SYNDICATE))
-			continue
-
-		possible_traitors += player.mind
-
-	if(!length(possible_traitors))
-		to_chat(usr, span_warning("Не удалось найти кандидатов на предателя — охотника."), confidential = TRUE)
-		return
-
-	var/datum/mind/newtraitormind = pick(possible_traitors)
-	var/datum/objective/assassinate/kill_objective = new()
-	kill_objective.target = target.mind
-	kill_objective.owner = newtraitormind
-	kill_objective.explanation_text = "Убейте [target.mind.name], [target.mind.assigned_role]."
-	newtraitormind.objectives += kill_objective
-	var/datum/antagonist/traitor/turf = new()
-	turf.give_objectives = FALSE
-	to_chat(newtraitormind.current, "[span_danger("ВНИМАНИЕ:")] [span_warning("Время отдать свой долг \"Синдикату\"!")]")
-	to_chat(newtraitormind.current, span_boldwarning("Цель: УБЕЙТЕ [target.real_name]. Сейчас находится в [get_area(target.loc)].</b>"))
-	newtraitormind.add_antag_datum(turf)
 
 // MARK: Transform
 /datum/smite/transform
@@ -299,21 +226,6 @@
 	target.AdjustJitter(40 SECONDS)
 	to_chat(target, span_userdanger("Вы чувствуете резкую боль в руках и ногах! Что-то отрывает их от вашего тела! Боги наказали вас за [reason]!"))
 	addtimer(CALLBACK(target, TYPE_PROC_REF(/mob/living/carbon/human, make_nugget)), 6 SECONDS)
-
-// MARK: Rod
-/datum/smite/rod
-	name = SMITE_ROD
-	desc = "Отправьте несдвигаемый стержень убить грешника."
-	logmsg = "a rod"
-	category = SMITE_CATEGORY_DEATH
-
-/datum/smite/rod/apply_effect(mob/living/target, reason)
-	var/starting_turf_x = target.x + rand(10, 15) * pick(1, -1)
-	var/starting_turf_y = target.y + rand(10, 15) * pick(1, -1)
-	var/turf/start = locate(starting_turf_x, starting_turf_y, target.z)
-	var/obj/effect/immovablerod/smite/rod = new (start, target)
-	rod.reason = reason
-	rod.go_for_a_walk(target)
 
 // MARK: Summon
 /datum/smite/summon

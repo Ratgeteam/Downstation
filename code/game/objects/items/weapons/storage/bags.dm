@@ -47,7 +47,6 @@
 	storage_slots = 30
 	max_combined_w_class = 30
 	can_hold = list() // any
-	cant_hold = list(/obj/item/disk/nuclear)
 
 /obj/item/storage/bag/trash/suicide_act(mob/user)
 	user.visible_message(span_suicide("[user] puts the [name] over [user.p_their()] head and starts chomping at the insides! Disgusting!"))
@@ -90,7 +89,6 @@
 	w_class = WEIGHT_CLASS_BULKY
 	display_contents_with_number = 0 //or else this will lead to stupid behavior.
 	can_hold = list() // any
-	cant_hold = list(/obj/item/disk/nuclear)
 
 /obj/item/storage/bag/plasticbag/mob_can_equip(mob/M, slot, disable_warning = FALSE, bypass_equip_delay_self = FALSE, bypass_obscured = FALSE, bypass_incapacitated = FALSE)
 	if(slot == ITEM_SLOT_HEAD && length(contents))
@@ -534,7 +532,7 @@
 	max_combined_w_class = 21
 	max_w_class = WEIGHT_CLASS_NORMAL
 	w_class = WEIGHT_CLASS_BULKY //Bigger than a book because physics
-	can_hold = list(/obj/item/book, /obj/item/storage/bible, /obj/item/tome, /obj/item/spellbook)
+	can_hold = list(/obj/item/book, /obj/item/storage/bible)
 	resistance_flags = FLAMMABLE
 
 /obj/item/storage/bag/books/get_ru_names()
@@ -601,7 +599,6 @@
 	w_class = WEIGHT_CLASS_BULKY
 	flags = CONDUCT
 	materials = list(MAT_METAL=3000)
-	cant_hold = list(/obj/item/disk/nuclear) // Prevents some cheesing
 
 /obj/item/storage/bag/tray/attack(mob/living/target, mob/living/user, params, def_zone, skip_attack_anim = FALSE)
 	. = ..()

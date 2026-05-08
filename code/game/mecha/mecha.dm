@@ -746,11 +746,6 @@
 	playsound(loc, 'sound/weapons/tap.ogg', 40, TRUE, -1)
 	user.visible_message(span_notice("[user] hits [name]. Nothing happens."), span_notice("You hit [name] with no visible effect."))
 
-/obj/mecha/attack_alien(mob/living/carbon/alien/user)
-	add_attack_logs(user, OCCUPANT_LOGGING, "Alien attacked mech [src]")
-	playsound(loc, 'sound/weapons/slash.ogg', 100, TRUE)
-	attack_generic(user, user.obj_damage, BRUTE, MELEE, 0, user.armour_penetration)
-
 /obj/mecha/attack_animal(mob/living/simple_animal/user)
 	if(!user.melee_damage_upper && !user.obj_damage)
 		user.custom_emote(EMOTE_VISIBLE, "[user.friendly] [src].")
@@ -768,10 +763,6 @@
 			add_attack_logs(user, OCCUPANT_LOGGING, "Animal attacked mech [src]")
 		attack_generic(user, animal_damage, user.melee_damage_type, MELEE, play_soundeffect)
 		return TRUE
-
-/obj/mecha/blob_act(obj/structure/blob/B)
-	B?.overmind?.blobstrain?.attack_mech(src)
-	take_damage(30, BRUTE, MELEE, 0, get_dir(src, B))
 
 /obj/mecha/attack_tk()
 	return
@@ -1339,9 +1330,6 @@
 	if(user.has_buckled_mobs()) //mob attached to us
 		to_chat(user, span_warning("You can't enter the exosuit with other creatures attached to you!"))
 		return TRUE
-	if(ratvarized && !isclocker(user))
-		balloon_alert(user, "запечатано!")
-		return TRUE
 	visible_message(span_notice("[user] starts to climb into [src]"))
 	INVOKE_ASYNC(src, TYPE_PROC_REF(/obj/mecha, put_in), user)
 	return TRUE
@@ -1888,20 +1876,5 @@
 				occupant_message(span_boldnotice("Короткое замыкание устранено."))
 	internal_damage &= ~int_dam_flag
 	diag_hud_set_mechstat()
-/obj/mecha/ratvar_act(convert_mecha)
-	if(!convert_mecha)
-		return
-	if(ratvarized)
-		repair_damage(max_integrity / 2)
-		return
-	ratvar_convert()
-
-/obj/mecha/proc/ratvar_convert()
-	for(var/rat_mecha in GLOB.ratvar_mechas)
-		var/datum/ratvar_mecha/converter = new rat_mecha
-		if(mech_type in converter.mech_types)
-			converter.convert(src)
-			visible_message(span_clocklarge("[DECLENT_RU_CAP(src, NOMINATIVE)] начинает громко грохотать, его механизмы заменяются шестернями!"))
-		QDEL_NULL(converter)
 
 #undef OCCUPANT_LOGGING

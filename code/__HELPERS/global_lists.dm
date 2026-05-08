@@ -18,8 +18,6 @@
 	// Alt heads
 	init_sprite_accessory_subtypes(/datum/sprite_accessory/alt_heads, GLOB.alt_heads_list)
 
-	init_datum_subtypes(/datum/wryn_building, GLOB.wryn_structures, null, "name")
-
 	init_datum_subtypes(/datum/robot_skin, GLOB.robot_skins, null, "type")
 
 	init_datum_subtypes(/datum/fake_administrator, GLOB.cached_fake_admins, null, "type")
@@ -44,8 +42,6 @@
 	init_datum_subtypes(/datum/superheroes, GLOB.all_superheroes, null, "name")
 	init_datum_subtypes(/datum/language, GLOB.all_languages, null, "name")
 	init_datum_subtypes(/datum/secspear_mode, GLOB.secspear_modes, null, "name")
-
-	init_datum_subtypes(/datum/devil_contract, GLOB.devil_contracts, list(/datum/devil_contract), "contract_type")
 
 	// Setup languages
 	for(var/language_name in GLOB.all_languages)
@@ -152,10 +148,8 @@
 		GLOB.world_topic_handlers[topic_handler_instance.topic_key] = topic_handler_type
 
 	GLOB.emote_list = init_emote_list()
-	GLOB.uplink_items = init_uplink_items_list()
 	GLOB.mining_vendor_items = init_mining_vendor_items_list()
 
-	GLOB.slotmachine_prizes = init_slotmachine_prizes(GLOB.uplink_items)
 
 	GLOB.item_skins = init_item_skins()
 
@@ -219,8 +213,6 @@
 	var/exoframe_type = /obj/item/organ/internal/cyberimp/chest/exoframe
 	for(var/obj/item/organ/internal/cyberimp/chest/exoframe/exoframe_instance as anything in subtypesof(exoframe_type))
 		GLOB.exoframe_types[exoframe_instance.id] = exoframe_instance
-
-	init_dice_rolls()
 /**
  * Creates every subtype of a given prototype (excluding the prototype itself) and adds them to a list
  *
@@ -289,15 +281,6 @@
 			else
 				.[emote_instance.key_third_person] |= emote_instance
 
-
-/// Initializes and returns a list of all uplink items by creating instances of each uplink item subtype that has a defined initial item.
-/proc/init_uplink_items_list()
-	. = list()
-	for(var/datum/uplink_item/uplink_item_type as anything in subtypesof(/datum/uplink_item))
-		if(!initial(uplink_item_type.item))
-			continue
-		var/datum/uplink_item/uplink_item_instance = new uplink_item_type
-		. += uplink_item_instance
 
 /**
  * Use this define to register something as a purchasable!
@@ -385,7 +368,6 @@
 	)
 	prize_list["Miscellaneous"] = list(
 		EQUIPMENT("Absinthe", /obj/item/reagent_containers/food/drinks/bottle/absinthe/premium, 500),
-		EQUIPMENT("Alien Toy", /obj/item/clothing/mask/facehugger/toy, 300),
 		EQUIPMENT("Richard & Co cigarettes", /obj/item/storage/fancy/cigarettes/cigpack_richard, 400),
 		EQUIPMENT("Cigar", /obj/item/clothing/mask/cigarette/cigar/havana, 300),
 		EQUIPMENT("GAR Meson Scanners", /obj/item/clothing/glasses/meson/gar, 800),
@@ -467,21 +449,6 @@
  * Arguments:
  * * uplink_items - List of uplink items to consider for slot machine prizes
  */
-/proc/init_slotmachine_prizes(list/uplink_items)
-	var/list/allowed_uplink_items = list()
-	for(var/datum/uplink_item/uplink_item as anything in uplink_items)
-		if(istype(uplink_item, /datum/uplink_item/racial) || uplink_item.hijack_only)
-			continue // Exclude racial and hijack-only items
-		allowed_uplink_items += uplink_item
-
-	var/list/slotmachine_prizes = list()
-	for(var/datum/slotmachine_prize/prize_type as anything in subtypesof(/datum/slotmachine_prize))
-		var/datum/slotmachine_prize/prize_instance = new prize_type(allowed_uplink_items)
-		if(!prize_instance.id)
-			continue
-		slotmachine_prizes[prize_instance.id] = prize_instance
-
-	return slotmachine_prizes
 
 
 /// Initializes and returns a list of all item skins by creating instances of each item skin subtype that has a defined name.
@@ -565,10 +532,3 @@ GLOBAL_LIST_INIT(body_zone, list(
 	BODY_ZONE_PRECISE_L_FOOT = list(NOMINATIVE = "левая ступня", GENITIVE = "левой ступни", DATIVE = "левой ступне", ACCUSATIVE = "левую ступню", INSTRUMENTAL = "левой ступнёй", PREPOSITIONAL = "левой ступне"),
 	BODY_ZONE_PRECISE_R_FOOT = list(NOMINATIVE = "правая ступня", GENITIVE = "правой ступни", DATIVE = "правой ступне", ACCUSATIVE = "правую ступню", INSTRUMENTAL = "правой ступнёй", PREPOSITIONAL = "правой ступне"),
 ))
-
-/proc/init_dice_rolls()
-	var/alist/rolls = alist()
-	for(var/roll_path in subtypesof(/datum/dice_roll))
-		var/datum/dice_roll/d_roll = new roll_path()
-		rolls[d_roll.number] = d_roll
-	GLOB.dice_rolls = rolls

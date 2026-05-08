@@ -11,7 +11,6 @@
 
 	if(!loc)
 		return FALSE
-	INVOKE_ASYNC(src, PROC_REF(burst_blob_in_mob))
 
 	if(stat != DEAD)
 		//Chemicals in the body
@@ -54,9 +53,6 @@
 
 	handle_fire()
 
-	var/datum/antagonist/vampire/vamp = mind?.has_antag_datum(/datum/antagonist/vampire)
-	if(vamp)
-		vamp.handle_vampire()
 
 	if(pulledby && pulledby.grab_state > GRAB_PASSIVE)
 		pull_on_life()

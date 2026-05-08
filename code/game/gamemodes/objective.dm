@@ -231,17 +231,7 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 	SSticker.mode.victims.Add(target)
 
 /datum/objective/punish/check_completion()
-	. = ..()
-	var/mob/living/carbon/true_devil/krampus/krampus = owner.current
-
-	if(!istype(krampus))
-		return
-
-	for(var/mob/mob as anything in krampus.bag_content)
-		if(mob.mind != target)
-			continue
-		return TRUE
-
+	// you know what to do here
 	return FALSE
 
 /datum/objective/mutiny
@@ -323,14 +313,6 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 /datum/objective/debrain //I want braaaainssss
 	name = "Debrain"
 	antag_menu_name = "Украсть мозг"
-
-/datum/objective/debrain/is_invalid_target(datum/mind/possible_target)
-	. = ..()
-	if(.)
-		return
-	// If the target is a changeling, then it's an invalid target. Since changelings can not be debrained.
-	if(ischangeling(possible_target))
-		return TARGET_INVALID_CHANGELING
 
 /datum/objective/debrain/find_target(list/target_blacklist)
 	..()
@@ -512,22 +494,6 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 			return FALSE
 		return TRUE
 	return FALSE
-
-/datum/objective/protect/mindslave //subytpe for mindslave implants
-	antag_menu_name = "Защитить хозяина"
-	needs_target = FALSE // To be clear, this objective should have a target, but it will always be manually set to the mindslaver through the mindslave antag datum.
-
-// This objective should only be given to a single owner. We can use `owner` and not `get_owners()`.
-/datum/objective/protect/mindslave/on_target_cryo()
-	if(owner?.current)
-		SEND_SOUND(owner.current, sound('sound/ambience/alarm4.ogg'))
-		owner.remove_antag_datum(/datum/antagonist/mindslave)
-		to_chat(owner.current, "<br>[span_userdanger("Вы замечаете, что ваш хозяин вошёл в криогенное хранилище и возвращаетесь к своему обычному состоянию.")]")
-		log_admin("[key_name(owner.current)]'s mindslave master has cryo'd, and is no longer a mindslave.")
-		message_admins("[key_name_admin(owner.current)]'s mindslave master has cryo'd, and is no longer a mindslave.") //Since they were on antag hud earlier, this feels important to log
-		qdel(src)
-
-/datum/objective/protect/contractor //subtype for support units
 
 /datum/objective/hijack
 	name = "Hijack"
@@ -1013,13 +979,6 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 	explanation_text = "Заполучите [target_amount] совместим[declension_ru(target_amount, "ый геном", "ых генома", "ых геномов")]. 'Extract DNA Sting' можно использовать, чтобы незаметно получить геномы, не убивая кого-либо."
 	return target_amount
 
-/datum/objective/absorb/check_completion()
-	for(var/datum/mind/user in get_owners())
-		var/datum/antagonist/changeling/cling = user?.has_antag_datum(/datum/antagonist/changeling)
-		if(cling?.absorbed_dna && (cling.absorbed_count >= target_amount))
-			return TRUE
-	return FALSE
-
 /datum/objective/destroy
 	name = "Destroy AI"
 	antag_menu_name = "Уничтожить ИИ"
@@ -1075,64 +1034,6 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 	antag_menu_name = "Украсть минимум 5 стволов"
 	explanation_text = "Украдите минимум 5 стволов!"
 	wanted_items = list(/obj/item/gun)
-
-/datum/objective/steal_five_of_type/summon_magic
-	antag_menu_name = "Украсть минимум 5 магических артефактов"
-	explanation_text = "Украдите минимум 5 магических артефактов!"
-	wanted_items = list()
-
-/datum/objective/steal_five_of_type/summon_magic/New()
-	wanted_items = GLOB.summoned_magic_objectives
-	..()
-
-/datum/objective/steal_five_of_type/summon_magic/check_completion()
-	var/stolen_count = 0
-	var/list/owners = get_owners()
-	var/list/all_items = list()
-
-	for(var/datum/mind/player in owners)
-		if(!isliving(player.current))
-			continue
-		all_items += player.current.get_all_contents()	//this should get things in cheesewheels, books, etc.
-
-	for(var/obj/item in all_items) //Check for wanted items
-		if(istype(item, /obj/item/spellbook) && !istype(item, /obj/item/spellbook/oneuse))
-			var/obj/item/spellbook/spellbook = item
-			if(spellbook.uses) //if the book still has powers...
-				stolen_count++ //it counts. nice.
-
-		if(istype(item, /obj/item/spellbook/oneuse))
-			var/obj/item/spellbook/oneuse/oneuse = item
-			if(!oneuse.used)
-				stolen_count++
-
-		else if(is_type_in_typecache(item, wanted_items))
-			stolen_count++
-
-	return stolen_count >= 5
-
-/datum/objective/blood
-	name = "Spread blood"
-	antag_menu_name = "Накопить кровь"
-	needs_target = FALSE
-
-/datum/objective/blood/New()
-	gen_amount_goal()
-	. = ..()
-
-/datum/objective/blood/proc/gen_amount_goal(low = 150, high = 400)
-	target_amount = rand(low, high)
-	target_amount = round(round(target_amount / 5) * 5)
-	explanation_text = "Накопить не менее [target_amount] единиц крови."
-	return target_amount
-
-/datum/objective/blood/check_completion()
-	for(var/datum/mind/player in get_owners())
-		var/datum/antagonist/vampire/vampire = player.has_antag_datum(/datum/antagonist/vampire)
-		if(vampire && (vampire.bloodtotal >= target_amount))
-			return TRUE
-
-		return FALSE
 
 // /vg/; Vox Inviolate for humans :V
 /datum/objective/minimize_casualties
@@ -1257,100 +1158,7 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 			if(total_amount >= target_amount)
 				return TRUE
 
-	var/datum/game_mode/heist/H = SSticker.mode
-	for(var/datum/mind/raider in H.raiders)
-		if(raider.current)
-			for(var/obj/O in raider.current.get_contents())
-				if(istype(O,target))
-					total_amount++
-				if(total_amount >= target_amount)
-					return TRUE
-
 	return FALSE
-
-/datum/objective/heist/salvage
-	antag_menu_name = "Добыть материалы"
-
-/datum/objective/heist/salvage/choose_target()
-	switch(rand(1,6))
-		if(1)
-			target = "plasteel"
-			target_amount = 100
-		if(2)
-			target = "solid plasma"
-			target_amount = 100
-		if(3)
-			target = "silver"
-			target_amount = 50
-		if(4)
-			target = "gold"
-			target_amount = 20
-		if(5)
-			target = "uranium"
-			target_amount = 20
-		if(6)
-			target = "diamond"
-			target_amount = 20
-
-	explanation_text = "Разграбьте или поторгуйтесь со станцией, заполучите [target] в количестве [target_amount] [declension_ru(target_amount, "штуки", "штук", "штук")] и сбегите отсюда."
-
-/datum/objective/heist/salvage/check_completion()
-	var/total_amount = 0
-
-	for(var/obj/item/O in locate(/area/shuttle/vox))
-		var/obj/item/stack/sheet/S
-		if(istype(O,/obj/item/stack/sheet))
-			if(O.name == target)
-				S = O
-				total_amount += S.get_amount()
-
-		for(var/obj/I in O.contents)
-			if(istype(I,/obj/item/stack/sheet))
-				if(I.name == target)
-					S = I
-					total_amount += S.get_amount()
-
-	for(var/obj/item/O in locate(/area/vox_station))
-		var/obj/item/stack/sheet/S
-		if(istype(O,/obj/item/stack/sheet))
-			if(O.name == target)
-				S = O
-				total_amount += S.get_amount()
-
-		for(var/obj/I in O.contents)
-			if(istype(I,/obj/item/stack/sheet))
-				if(I.name == target)
-					S = I
-					total_amount += S.get_amount()
-
-	var/datum/game_mode/heist/H = SSticker.mode
-	for(var/datum/mind/raider in H.raiders)
-		if(raider.current)
-			for(var/obj/item/O in raider.current.get_contents())
-				if(istype(O,/obj/item/stack/sheet))
-					if(O.name == target)
-						var/obj/item/stack/sheet/S = O
-						total_amount += S.get_amount()
-
-	if(total_amount >= target_amount) return TRUE
-	return FALSE
-
-/datum/objective/heist/inviolate_crew
-	antag_menu_name = "Не бросать своих"
-	explanation_text = "Не бросайте ни одного вокса, живого или мёртвого.."
-
-/datum/objective/heist/inviolate_crew/check_completion()
-	var/datum/game_mode/heist/H = SSticker.mode
-	if(H.is_raider_crew_safe())
-		return TRUE
-	return FALSE
-
-/datum/objective/heist/inviolate_death
-	antag_menu_name = "Ненасилие"
-	explanation_text = "Следуйте Ненасилию. Минимизируйте смерть и потерю ресурсов."
-
-/datum/objective/heist/inviolate_death/check_completion()
-	return TRUE
 
 // Traders
 // These objectives have no check_completion, they exist only to tell Sol Traders what to aim for.
@@ -1388,51 +1196,6 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 	antag_menu_name = "Взломать борга"
 	explanation_text = "Используя свои перчатки, обратите на свою сторону хотя бы одного киборга, чтобы он помог вам в саботаже станции!"
 	needs_target = FALSE
-
-/datum/objective/plant_explosive
-	name = "Plant Explosive"
-	antag_menu_name = "Заложить бомбу"
-	///Where we should KABOOM
-	var/area/detonation_location
-	var/list/area_blacklist = list(
-		/area/engineering/engine, /area/engineering/supermatter,
-		/area/toxins/test_area, /area/turret_protected/ai)
-	needs_target = FALSE
-
-/datum/objective/plant_explosive/New(text, datum/team/team_to_join)
-	if(!choose_target_area())
-		explanation_text = "Свободная цель"
-	..()
-
-/datum/objective/plant_explosive/Destroy()
-	. = ..()
-	detonation_location = null
-
-/datum/objective/plant_explosive/proc/choose_target_area()
-	for(var/sanity in 1 to 100) // 100 checks at most.
-		var/area/selected_area = pick(get_sorted_areas())
-		if(selected_area && is_station_level(selected_area.z) && selected_area.valid_territory) //Целью должна быть зона на станции!
-			if(selected_area in area_blacklist)
-				continue
-			detonation_location = selected_area
-			break
-	. = detonation_location
-	if(.)
-		explanation_text = "Взорвите выданную вам бомбу в [detonation_location]. Учтите, что бомбу нельзя активировать на не предназначенной для подрыва территории!"
-
-/datum/objective/plant_explosive/proc/give_bomb(delayed = null)
-	if(isnull(delayed))
-		actual_give_bomb()
-	else if(isnum(delayed))
-		addtimer(CALLBACK(src, PROC_REF(actual_give_bomb)), delayed)
-
-/datum/objective/plant_explosive/proc/actual_give_bomb()
-	if(!owner || !owner.current || !detonation_location || completed)
-		return
-	var/mob/ninja = owner.current
-	var/obj/item/grenade/plastic/c4/ninja/bomb_item = new(ninja)
-	bomb_item.detonation_objective = src
-	ninja.equip_or_collect(bomb_item, ITEM_SLOT_POCKET_LEFT)
 
 /datum/objective/get_money
 	name = "Steal Money"
@@ -1698,44 +1461,6 @@ GLOBAL_LIST_EMPTY(admin_objective_list)
 	explanation_text = "Используя свои перчатки, загрузите в ИИ станции специальный вирус через консоль для смены законов которая стоит в загрузочной. \
 	Подойдёт только консоль в этой зоне из-за уязвимости оставленной заранее для вируса. \
 	Учтите, что установка займёт время и ИИ скорее всего будет уведомлён о вашей попытке взлома!"
-
-/datum/objective/blob_critical_mass
-	needs_target = FALSE
-	antag_menu_name = "Достичь критической массы"
-	//Total blob tiles count
-	var/critical_mass = -2
-	//Needed blob tiles count
-	var/needed_critical_mass = -1
-
-/datum/objective/blob_critical_mass/check_completion()
-	if(!completed)
-		completed = needed_critical_mass <= critical_mass && SSsecurity_level.get_current_level_as_number() < SEC_LEVEL_DELTA
-	return ..()
-
-/datum/objective/blob_critical_mass/proc/set_target()
-	explanation_text = "Наберите критическую массу, распостраняясь по станции. Текущаяя масса [critical_mass]. Необходимо набрать [needed_critical_mass]. Масса может изменяться в зависимости от количества блобов."
-
-/datum/objective/blob_find_place_to_burst
-	needs_target = FALSE
-	antag_menu_name = "Найти укромное место"
-	explanation_text = "Найдите укромное место на станции, в котором вас не смогут найти после вылупления до тех пор, пока вы не наберетесь сил."
-
-/datum/objective/blob_minion
-	name = "protect the blob core"
-	antag_menu_name = "Защищать ядро"
-	explanation_text = "Защищайте ядро блоба и исполняйте приказы надразумов. Любой ценой."
-	var/datum/weakref/overmind
-
-/datum/objective/blob_minion/check_completion()
-	var/mob/camera/blob/resolved_overmind = overmind.resolve()
-	if(!resolved_overmind)
-		return FALSE
-	return resolved_overmind.stat != DEAD
-
-/datum/objective/xeno_genocide
-	name = "Геноцид разумной жизни"
-	needs_target = FALSE
-	explanation_text = "Убивайте всех, кто не является ксеноморфом. Утопите станцию в крови!"
 
 /datum/objective/serve
 	name = "Служить"

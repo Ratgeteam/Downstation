@@ -15,23 +15,12 @@
 	QDEL_LIST(internal_organs)
 	QDEL_LIST(stomach_contents)
 	QDEL_LIST(processing_patches)
-	var/mob/living/simple_animal/borer/B = has_brain_worms()
-	if(B)
-		B.leave_host()
-		qdel(B)
 	GLOB.carbon_list -= src
 	return ..()
 
 /mob/living/carbon/handle_atom_del(atom/A)
 	LAZYREMOVE(processing_patches, A)
 	return ..()
-
-/mob/living/carbon/blob_act(obj/structure/blob/B)
-	if(stat == DEAD)
-		return
-	else
-		show_message(span_userdanger("Блоб атакует!"))
-		adjustBruteLoss(10)
 
 /mob/living/carbon/Move(atom/newloc, direct = NONE, glide_size_override = 0, update_dir = TRUE)
 	. = ..()
@@ -746,12 +735,6 @@
 /mob/living/carbon/get_status_tab_items()
 	var/list/status_tab_data = ..()
 	. = status_tab_data
-	var/obj/item/organ/internal/xenos/plasmavessel/vessel = get_int_organ(/obj/item/organ/internal/xenos/plasmavessel)
-	if(vessel)
-		status_tab_data[++status_tab_data.len] = list("Запас плазмы:", "[vessel.stored_plasma]/[vessel.max_plasma]")
-	var/obj/item/organ/internal/wryn/glands/glands = get_int_organ(/obj/item/organ/internal/wryn/glands)
-	if(glands)
-		status_tab_data[++status_tab_data.len] = list("Запас воска: [glands.wax]")
 
 /mob/living/carbon/slip(weaken, obj/slipped_on, lube_flags, tilesSlipped)
 	if(movement_type & MOVETYPES_NOT_TOUCHING_GROUND)

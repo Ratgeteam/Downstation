@@ -89,7 +89,6 @@
 		/obj/vehicle/ridden/speedbike/red = 10,
 		/obj/item/grenade/clusterbuster/honk = 10,
 		/obj/item/toy/katana = 10,
-		/obj/item/stack/sheet/mineral/abductor/fifty = 20,
 		/obj/item/sord = 20,
 		/obj/item/toy/syndicateballoon = 15,
 		/obj/item/lighter/zippo/gonzofist = 5,
@@ -125,7 +124,6 @@
 	name = "organic objects"
 	loot = list(
 		/obj/item/seeds/random/labelled = 50,
-		/obj/item/guardiancreator/biological = 5,
 		/obj/item/organ/internal/vocal_cords/adamantine = 15,
 		/obj/item/storage/pill_bottle/random_meds/labelled = 25,
 		/obj/item/reagent_containers/glass/bottle/reagent/omnizine = 15,

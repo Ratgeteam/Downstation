@@ -166,9 +166,6 @@
 /mob/living/carbon/human/golem_plastitanium/Initialize(mapload)
 	. = ..(mapload, /datum/species/golem/plastitanium)
 
-/mob/living/carbon/human/golem_alien_alloy/Initialize(mapload)
-	. = ..(mapload, /datum/species/golem/alloy)
-
 /mob/living/carbon/human/golem_uranium/Initialize(mapload)
 	. = ..(mapload, /datum/species/golem/uranium)
 
@@ -189,12 +186,6 @@
 
 /mob/living/carbon/human/golem_tranquillite/Initialize(mapload)
 	. = ..(mapload, /datum/species/golem/tranquillite)
-
-/mob/living/carbon/human/golem_clockwork/Initialize(mapload)
-	. = ..(mapload, /datum/species/golem/clockwork)
-
-/mob/living/carbon/human/wryn/Initialize(mapload)
-	. = ..(mapload, /datum/species/wryn)
 
 /mob/living/carbon/human/nucleation/Initialize(mapload)
 	. = ..(mapload, /datum/species/nucleation)
@@ -229,31 +220,6 @@
 			status_tab_data[++status_tab_data.len] = list("Давление на выходе:", "[internal.distribute_pressure]")
 
 	// I REALLY need to split up status panel things into datums
-	var/mob/living/simple_animal/borer/borer = has_brain_worms()
-	if(borer?.controlling)
-		status_tab_data[++status_tab_data.len] = list("Объём химикатов:", borer.chemicals)
-		status_tab_data[++status_tab_data.len] = list("Стадия:", borer.antag_datum.borer_rank.rankname)
-		status_tab_data[++status_tab_data.len] = list("Очки эволюции:", borer.antag_datum.evo_points)
-
-	if(mind)
-		var/datum/antagonist/changeling/cling = mind.has_antag_datum(/datum/antagonist/changeling)
-		if(cling)
-			status_tab_data[++status_tab_data.len] = list("Объём химикатов:", "[cling.chem_charges]/[cling.chem_storage]")
-			status_tab_data[++status_tab_data.len] = list("ДНК поглощено:", "[cling.absorbed_count]")
-
-		var/datum/antagonist/vampire/vamp = mind.has_antag_datum(/datum/antagonist/vampire)
-		if(vamp)
-			status_tab_data[++status_tab_data.len] = list("Всего крови:", "[vamp.bloodtotal]")
-			status_tab_data[++status_tab_data.len] = list("Доступная кровь:", "[vamp.bloodusable]")
-
-		if(isclocker(mind.current))
-			status_tab_data[++status_tab_data.len] = list("Заряд:", "[GLOB.clockwork_power]")
-
-		var/datum/antagonist/ninja/ninja = mind?.has_antag_datum(/datum/antagonist/ninja)
-		if(ninja?.my_suit)
-			status_tab_data[++status_tab_data.len] = list("Заряд костюма:","[ninja.get_cell_charge()]")
-			status_tab_data[++status_tab_data.len] = list("Заряд рывков:","[ninja.get_dash_charge()]")
-
 	if(isspacepod(loc))
 		var/obj/spacepod/S = loc
 		status_tab_data[++status_tab_data.len] = list("Заряд челнока:", "[istype(S.battery) ? "[(S.battery.charge / S.battery.maxcharge) * 100]" : "Батарея отсутствует"]")
@@ -331,27 +297,6 @@
 			limbs_affected--
 
 #undef ex_armor_reduction
-
-/mob/living/carbon/human/blob_act(obj/structure/blob/B)
-	if(stat == DEAD)
-		return
-	SEND_SIGNAL(src, COMSIG_ATOM_BLOB_ACT, B)
-	show_message(span_userdanger("Вас атакует блоб!"))
-	var/dam_zone = list(
-		BODY_ZONE_CHEST,
-		BODY_ZONE_PRECISE_GROIN,
-		BODY_ZONE_HEAD,
-		BODY_ZONE_L_ARM,
-		BODY_ZONE_R_ARM,
-		BODY_ZONE_L_LEG,
-		BODY_ZONE_R_LEG,
-		BODY_ZONE_PRECISE_L_HAND,
-		BODY_ZONE_PRECISE_R_HAND,
-		BODY_ZONE_PRECISE_L_FOOT,
-		BODY_ZONE_PRECISE_R_FOOT,
-	)
-	var/obj/item/organ/external/affecting = get_organ(ran_zone(dam_zone))
-	apply_damage(5, BRUTE, affecting, run_armor_check(affecting, MELEE))
 
 /// Get rank from ID from hands, wear_id, pda, and then from uniform
 /mob/living/carbon/human/proc/get_authentification_rank(if_no_id = "Без ID", if_no_job = "Без должности")
@@ -1488,8 +1433,6 @@ Eyes need to have significantly high darksight to shine unless the mob has the X
 	apply_effect(current_size * 3, IRRADIATE)
 
 /mob/living/carbon/human/narsie_act(obj/singularity/god/narsie/narsie)
-	if(iswizard(src) && iscultist(src)) //Wizard cultists are immune to narsie because it would prematurely end the wiz round that's about to end by the automated shuttle call anyway
-		return
 	if(narsie)
 		narsie.soul_devoured++
 	..()
@@ -1555,7 +1498,7 @@ Eyes need to have significantly high darksight to shine unless the mob has the X
 	return (health <= HEALTH_THRESHOLD_CRIT && stat == UNCONSCIOUS)
 
 /mob/living/carbon/human/IsAdvancedToolUser()
-	if(dna.species.has_fine_manipulation || ischangeling(src) || BorerControlling())
+	if(dna.species.has_fine_manipulation)
 		return TRUE
 	return FALSE
 
@@ -1655,11 +1598,6 @@ Eyes need to have significantly high darksight to shine unless the mob has the X
 		to_chat(src, "[mind.martial_art.no_guns_message]")
 		return FALSE
 
-	// ninjas will not use default ranged weapons
-	var/datum/antagonist/ninja/ninja = mind?.has_antag_datum(/datum/antagonist/ninja)
-	if(ninja && !ninja.allow_guns && !check_gun.ninja_weapon)
-		to_chat(src, "[ninja.no_guns_message]")
-		return FALSE
 
 /mob/living/carbon/human/proc/change_icobase(new_icobase, new_deform, owner_sensitive)
 	for(var/obj/item/organ/external/O as anything in bodyparts)
@@ -1778,13 +1716,13 @@ Eyes need to have significantly high darksight to shine unless the mob has the X
 	. += "---"
 
 /mob/living/carbon/human/adjust_nutrition(change, forced)
-	if(!forced && HAS_TRAIT(src, TRAIT_NO_HUNGER) && !isvampire(src))
+	if(!forced && HAS_TRAIT(src, TRAIT_NO_HUNGER))
 		return FALSE
 	. = ..()
 	try_update_nutrition_level()
 
 /mob/living/carbon/human/set_nutrition(change, forced)
-	if(!forced && HAS_TRAIT(src, TRAIT_NO_HUNGER) && !isvampire(src))
+	if(!forced && HAS_TRAIT(src, TRAIT_NO_HUNGER))
 		return FALSE
 	. = ..()
 	try_update_nutrition_level()
@@ -1828,8 +1766,6 @@ Eyes need to have significantly high darksight to shine unless the mob has the X
 	special_check_for_transplantation()
 	if(!mind)
 		return
-	if(mind.assigned_role == "Cluwne") //HUNKE your suffering never stops
-		makeCluwne()
 	if(LAZYIN(mind.curses, "high_rp")) // Probably need to make a new proc to handle curses in case if there will be new ones
 		curse_high_rp()
 

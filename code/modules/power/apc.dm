@@ -256,17 +256,12 @@
 /obj/machinery/power/apc/Destroy(force)
 	SStgui.close_uis(wires)
 	GLOB.apcs -= src
-	if(malfai && operating)
-		malfai.malf_picker.processing_time = clamp(malfai.malf_picker.processing_time - 10,0,1000)
 	area.power_light = 0
 	area.power_equip = 0
 	area.power_environ = 0
 	area.power_change()
-	if(occupier)
-		malfvacate(TRUE)
 	QDEL_NULL(wires)
 	QDEL_NULL(cell)
-	QDEL_NULL(cog)
 	if(terminal)
 		disconnect_terminal()
 	area.apc -= src
@@ -302,8 +297,6 @@
 		cell.maxcharge = cell_type	// cell_type is maximum charge (old default was 1000 or 2500 (values one and two respectively)
 		cell.charge = start_charge * cell.maxcharge / 100		// (convert percentage to actual value)
 
-	cog = null // Or you can't put it in
-
 	update_icon()
 
 	make_terminal()
@@ -324,8 +317,6 @@
 				. += span_notice("Electronics installed but not wired.")
 			else /* if(!has_electronics && !terminal) */
 				. += span_notice("There are no electronics nor connected wires.")
-			if(user.Adjacent(src) && cog)
-				. += span_warning("[src]'s innards have been replaced by strange brass machinery!")
 		else
 			if(stat & MAINT)
 				. += span_notice("The cover is closed. Something wrong with it: it doesn't work.")
@@ -333,8 +324,6 @@
 				. += span_warning("The cover is broken. It may be hard to force it open.")
 			else
 				. += span_notice("The cover is closed.")
-	if(cog && isclocker(user))
-		. += span_clock("There is an integration cog installed!")
 
 // update the APC icon to show the three base states
 // also add overlays for indicator lights
@@ -581,11 +570,6 @@
 		if(!user.drop_transfer_item_to_loc(I, src))
 			return ..()
 		cell = I
-		for(var/mob/living/simple_animal/demon/pulse_demon/demon in cell)
-			demon.forceMove(src)
-			demon.current_power = src
-			if(!being_hijacked) // first come first serve
-				demon.try_hijack_apc(src)
 		if(being_hijacked)
 			cell.rigged = FALSE // don't blow the demon up
 		user.visible_message(
@@ -727,50 +711,6 @@
 		qdel(I)
 		return ATTACK_CHAIN_BLOCKED_ALL
 
-	if(istype(I, /obj/item/clockwork/integration_cog))
-		add_fingerprint(user)
-		if(!isclocker(user))
-			to_chat(user, span_warning("You fiddle around with the APC, to no avail."))
-			return ATTACK_CHAIN_PROCEED
-		if(cog)
-			to_chat(user, span_warning("This APC already has a cog."))
-			return ATTACK_CHAIN_PROCEED
-		if(opened == APC_CLOSED)
-			playsound(loc, 'sound/items/crowbar.ogg', 50, TRUE)
-			user.visible_message(
-				span_warning("[user.name] starts slicing the APC's cover lock."),
-				span_clock("You start slicing the APC's cover lock..."),
-			)
-			if(!do_after(user, 4 SECONDS * I.toolspeed, src, category = DA_CAT_TOOL) || !isclocker(user) || cog || opened != APC_CLOSED)
-				return ATTACK_CHAIN_PROCEED
-			user.visible_message(
-				span_warning("[user.name] has sliced the APC's cover lock, and it swings wide open."),
-				span_clock("You have sliced the APC's cover lock apart, and it swings wide open."),
-			)
-			opened = APC_OPENED
-			update_icon()
-			return ATTACK_CHAIN_PROCEED_SUCCESS
-		playsound(loc, 'sound/machines/click.ogg', 50, TRUE)
-		user.visible_message(
-			span_warning("[user.name] starts pressing [I] into the APC's internals."),
-			span_clock("You hold [I] in place within the APC, and it starts to slowly warm up..."),
-		)
-		if(!do_after(user, 7 SECONDS * I.toolspeed, src, category = DA_CAT_TOOL) || !isclocker(user) || cog)
-			return ATTACK_CHAIN_PROCEED
-		if(!user.drop_transfer_item_to_loc(I, src))
-			return ATTACK_CHAIN_PROCEED
-		playsound(user, 'sound/machines/clockcult/integration_cog_install.ogg', 50, TRUE)
-		user.visible_message(
-			span_warning("[user.name] has installed [I] into the APC's internals."),
-			"[span_clock("Replicant alloy rapidly covers the APC's innards, replacing the machinery.<br>")][span_clockitalic("This APC will now passively provide power to the cult.")]",
-		)
-		cog = new(src)
-		opened = APC_CLOSED
-		locked = FALSE
-		update_icon()
-		qdel(I)
-		return ATTACK_CHAIN_BLOCKED_ALL
-
 	return ..()
 
 /obj/machinery/power/apc/examine(mob/user)
@@ -834,15 +774,6 @@
 							span_notice("You remove the power control board."))
 						new /obj/item/apc_electronics(loc)
 						return
-		else if(cog)
-			user.visible_message("[user] starts prying [cog] from [src].", \
-			span_notice("You painstakingly start tearing [cog] out of [src]'s guts..."))
-			if(I.use_tool(src, user, 8 SECONDS, volume = I.tool_volume))
-				user.visible_message("[user] destroys [cog] in [src]!", \
-				span_notice("[cog] comes free with a clank and snaps in two as the machinery returns to normal!"))
-				playsound(src, 'sound/items/deconstruct.ogg', 50, TRUE)
-				QDEL_NULL(cog)
-			return
 		else if(opened != APC_COVER_OFF) //cover isn't removed
 			opened = APC_CLOSED
 			coverlocked = TRUE //closing cover relocks it
@@ -1040,9 +971,6 @@
 		return FALSE
 
 	// Only if they're a traitor OR they have the malf picker from the combat module
-	if(!malf.mind?.has_antag_datum(/datum/antagonist/traitor) && !malf.malf_picker)
-		return FALSE
-
 	if(malfai == (malf.parent || malf))
 		if(occupier == malf)
 			return APC_MALF_SHUNTED_HERE
@@ -1062,7 +990,7 @@
 /obj/machinery/power/apc/ui_data(mob/user)
 	var/list/data = list()
 	data["locked"] = is_locked(user)
-	data["normallyLocked"] = cog ? !isclocker(user) : locked
+	data["normallyLocked"] = locked
 	data["isOperating"] = operating
 	data["externalPower"] = main_status
 	data["powerCellStatus"] = cell ? cell.percent() : null
@@ -1186,7 +1114,7 @@
 /obj/machinery/power/apc/proc/is_authenticated(mob/user)
 	if(user.can_admin_interact())
 		return TRUE
-	if(isAI(user) || (isrobot(user) || user.has_unlimited_silicon_privilege) && !iscogscarab(user))
+	if(isAI(user) || (isrobot(user) || user.has_unlimited_silicon_privilege))
 		return TRUE
 	else
 		return !locked
@@ -1194,7 +1122,7 @@
 /obj/machinery/power/apc/proc/is_locked(mob/user)
 	if(user.can_admin_interact())
 		return FALSE
-	if(isAI(user) || (isrobot(user) || user.has_unlimited_silicon_privilege) && !iscogscarab(user))
+	if(isAI(user) || (isrobot(user) || user.has_unlimited_silicon_privilege))
 		return FALSE
 	else
 		return locked
@@ -1243,15 +1171,6 @@
 		if("overload")
 			if(usr.has_unlimited_silicon_privilege)
 				INVOKE_ASYNC(src, TYPE_PROC_REF(/obj/machinery/power/apc, overload_lighting))
-		if("hack")
-			if(get_malf_status(usr))
-				malfhack(usr)
-		if("occupy")
-			if(get_malf_status(usr))
-				malfoccupy(usr)
-		if("deoccupy")
-			if(get_malf_status(usr))
-				malfvacate()
 		if("emergency_lighting")
 			emergency_lights = !emergency_lights
 			for(var/obj/machinery/light/light as anything in area.lights_cache)
@@ -1262,76 +1181,6 @@
 	operating = !operating
 	update()
 	update_icon()
-
-/obj/machinery/power/apc/proc/malfhack(mob/living/silicon/ai/malf)
-	if(!istype(malf))
-		return
-	if(get_malf_status(malf) != APC_MALF_NOT_HACKED)
-		return
-	if(malf.malfhacking)
-		to_chat(malf, "You are already hacking an APC.")
-		return
-	to_chat(malf, "Beginning override of APC systems. This takes some time, and you cannot perform other actions during the process.")
-	malf.malfhack = src
-	malf.malfhacking = addtimer(CALLBACK(malf, TYPE_PROC_REF(/mob/living/silicon/ai, malfhacked), src), 600, TIMER_STOPPABLE)
-	var/atom/movable/screen/alert/hackingapc/A
-	A = malf.throw_alert("hackingapc", /atom/movable/screen/alert/hackingapc)
-	A.target = src
-
-/obj/machinery/power/apc/proc/malfoccupy(mob/living/silicon/ai/malf)
-	if(!istype(malf))
-		return
-	if(isapc(malf.loc)) // Already in an APC
-		to_chat(malf, span_warning("You must evacuate your current APC first!"))
-		return
-	if(!malf.can_shunt)
-		to_chat(malf, span_warning("You cannot shunt!"))
-		return
-	if(!is_station_level(z))
-		return
-	occupier = new /mob/living/silicon/ai(src,malf.laws,null,1)
-	occupier.adjustOxyLoss(malf.getOxyLoss())
-	if(!findtext(occupier.name, "APC Copy"))
-		occupier.name = "[malf.name] APC Copy"
-	if(malf.parent)
-		occupier.parent = malf.parent
-	else
-		occupier.parent = malf
-	malf.shunted = 1
-	malf.mind.transfer_to(occupier)
-	occupier.eyeobj.name = "[occupier.name] (AI Eye)"
-	if(malf.parent)
-		qdel(malf)
-	var/datum/action/innate/ai/return_to_core/R = new
-	R.Grant(occupier)
-	occupier.cancel_camera()
-	if((SSsecurity_level.get_current_level_as_number() == SEC_LEVEL_DELTA) && malf.nuking)
-		for(var/obj/item/pinpointer/point in GLOB.pinpointer_list)
-			point.the_disk = src //the pinpointer will detect the shunted AI
-
-/obj/machinery/power/apc/proc/malfvacate(forced = FALSE)
-	if(!occupier)
-		return
-	if(occupier.parent && occupier.parent.stat != DEAD)
-		occupier.mind.transfer_to(occupier.parent)
-		occupier.parent.shunted = 0
-		occupier.parent.adjustOxyLoss(occupier.getOxyLoss())
-		occupier.parent.cancel_camera()
-		qdel(occupier)
-		if(SSsecurity_level.get_current_level_as_number() == SEC_LEVEL_DELTA)
-			for(var/obj/item/pinpointer/point in GLOB.pinpointer_list)
-				for(var/mob/living/silicon/ai/A in GLOB.ai_list)
-					if((A.stat != DEAD) && A.nuking)
-						point.the_disk = A //The pinpointer tracks the AI back into its core.
-	else
-		to_chat(occupier, span_danger("Primary core damaged, unable to return core processes."))
-		if(forced)
-			occupier.loc = loc
-			ASYNC
-				occupier.death()
-			occupier.gib()
-			for(var/obj/item/pinpointer/point in GLOB.pinpointer_list)
-				point.the_disk = null //Pinpointers go back to tracking the nuke disk
 
 /obj/machinery/power/apc/proc/ion_act()
 	//intended to be exactly the same as an AI malf attack
@@ -1598,9 +1447,6 @@
 	update_icon()
 	update()
 
-/obj/machinery/power/apc/blob_act(obj/structure/blob/B)
-	set_broken()
-
 /obj/machinery/power/apc/zap_act(power, zap_flags)
 	if(obj_integrity <= 0)
 		zap_flags &= ~(ZAP_OBJ_DAMAGE | ZAP_MACHINE_EXPLOSIVE)
@@ -1612,12 +1458,8 @@
 		terminal = null
 
 /obj/machinery/power/apc/proc/set_broken()
-	if(malfai && operating)
-		malfai.malf_picker.processing_time = clamp(malfai.malf_picker.processing_time - 10,0,1000)
 	stat |= BROKEN
 	operating = FALSE
-	if(occupier)
-		malfvacate(forced = TRUE)
 	update_icon()
 	update()
 

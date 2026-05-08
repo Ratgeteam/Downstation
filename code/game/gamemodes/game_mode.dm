@@ -128,7 +128,6 @@
 
 	/// A list of all minds currently in the cult
 	var/list/datum/mind/cult = list()
-	var/datum/cult_objectives/cult_objs = new
 	/// Does the cult have glowing eyes
 	var/cult_risen = FALSE
 	/// Does the cult have halos
@@ -144,7 +143,6 @@
 
 	/// A list of all minds currently in the cult
 	var/list/datum/mind/clockwork_cult = list()
-	var/datum/clockwork_objectives/clocker_objs = new
 	/// Does the clockers have significant power stored
 	var/power_reveal = FALSE
 	/// Does the cult have halos
@@ -157,31 +155,6 @@
 	var/reveal_percent
 
 	/// List of of blobs, their offsprings and blobburnouts spawned by them
-	var/list/blobs = list(
-		"infected" = list(),
-		"offsprings" = list(),
-		"minions" = list()
-	)
-	/// Count of blob tiles to blob win
-	var/blob_win_count = BLOB_BASE_TARGET_POINT
-	/// Number of resource produced by the core
-	var/blob_point_rate = 3
-	/// Number of bursted blob infected
-	var/bursted_blobs_count = 0
-	/// Total blob submode stage
-	var/blob_stage = BLOB_STAGE_NONE
-	/// The need to delay the end of the game when the blob wins
-	var/delay_blob_end = FALSE
-	/// Disables automatic GAMMA code
-	var/off_auto_gamma = FALSE
-	/// Disables automatic nuke codes
-	var/off_auto_nuke_codes = FALSE
-	/// Is all blobs have infinity points
-	var/is_blob_infinity_points = FALSE
-	/// Is all blobs have infinity points
-	var/list/legit_blobs = list()
-	/// Total blobs objective
-	var/datum/objective/blob_critical_mass/blob_objective
 
 	// LEGACY SHIT!
 	var/list/datum/mind/shadows = list()
@@ -246,8 +219,6 @@
 
 	SScargo_quests.roll_start_quests()
 	generate_station_goals()
-	GLOB.start_state = new /datum/station_state()
-	GLOB.start_state.count()
 	return TRUE
 
 /datum/game_mode/proc/set_mode_in_db()	// I wonder what this could do guessing by the name
@@ -726,16 +697,14 @@
 	for(var/obj/machinery/nuclearbomb/bomb in SSmachines.get_by_type(/obj/machinery/nuclearbomb))
 		if(is_station_level(bomb.z))
 			nuke_status = NUKE_CORE_MISSING
-			if(bomb.core)
-				nuke_status = NUKE_STATUS_INTACT
 	return nuke_status
 
 /datum/game_mode/proc/replace_jobbanned_player(mob/living/player, role_type)
 	var/list/mob/dead/observer/candidates = SSghost_spawns.poll_candidates("Do you want to play as a [role_type]?", role_type, FALSE, 10 SECONDS)
-	
+
 	if(QDELETED(player))
 		return
-	
+
 	var/mob/dead/observer/theghost = null
 	if(length(candidates))
 		theghost = pick(candidates)
@@ -864,36 +833,12 @@
 /// Gets the value of all end of round stats through auto_declare and returns them
 /datum/game_mode/proc/get_end_of_round_antagonist_statistics()
 	. = list()
-	. += auto_declare_completion_traitor()
-	. += auto_declare_completion_vampire()
-	. += auto_declare_completion_enthralled()
-	. += auto_declare_completion_changeling()
-	. += auto_declare_completion_wizard()
-	. += auto_declare_completion_revolution()
-	. += auto_declare_completion_abduction()
-	. += auto_declare_completion_morph()
-	. += auto_declare_completion_revenant()
-	. += auto_declare_completion_honksquad()
-	. += auto_declare_completion_deathsquad()
 	. += auto_declare_completion_sst()
 	. += auto_declare_completion_sit()
-	. += auto_declare_completion_blob()
-	. += auto_declare_completion_heist()
-	. += auto_declare_completion_ninja()
-	. += auto_declare_completion_thief()
-	. += auto_declare_completion_goon_vampire()
-	. += auto_declare_completion_goon_enthralled()
-	. += auto_declare_completion_devil()
-	. += auto_declare_completion_sintouched()
 	list_clear_nulls(.)
 
 /datum/game_mode/proc/apocalypse_cinema(obj/singularity/god/god, inevitable = FALSE)
-	if(istype(god, /obj/singularity/god/narsie))
-		return SSticker.cultdat.apocalypse_cinema
-
-	if(istype(god, /obj/singularity/god/ratvar))
-		return /datum/cinematic/cult_arm_ratvar
-
+	// you may add cinematics here
 	return FALSE
 
 /datum/game_mode/proc/apocalypse(god_name)
@@ -926,18 +871,6 @@
 	var/datum/cinematic/cinema = apocalypse_cinema(god, FALSE)
 
 	if(!cinema)
-		var/obj/machinery/nuclearbomb/bomb
-		for(var/obj/machinery/nuclearbomb/bomb_to_find in GLOB.poi_list)
-			if(is_station_level(bomb_to_find.z) && bomb_to_find.core)
-				bomb = bomb_to_find
-				break
-
-		if(bomb)
-			bomb.safety = FALSE
-			bomb.explode()
-			qdel(god)
-			return
-
 		cinema = apocalypse_cinema(god, TRUE)
 
 	play_cinematic(cinema, world)
@@ -964,6 +897,41 @@
 
 /datum/game_mode/proc/late_join(mob/new_player/player)
 	return FALSE
+
+/datum/game_mode/proc/end_game()
+	if(!SSticker)
+		return
+	SSticker.current_state = GAME_STATE_FINISHED
+
+/proc/config_to_roles(list/check_list)
+	var/list/new_list = list()
+	for(var/index in check_list)
+		switch(index)
+			if("hijacker")
+				new_list += ROLE_HIJACKER
+				new_list[ROLE_HIJACKER] = check_list[index]
+			if("malfai")
+				new_list += ROLE_MALF_AI
+				new_list[ROLE_MALF_AI] = check_list[index]
+			if("prisoner")
+				new_list += ROLE_ESCAPING_PRISONER
+				new_list[ROLE_ESCAPING_PRISONER] = check_list[index]
+			if("ninja")
+				new_list += ROLE_NINJA
+				new_list[ROLE_NINJA] = check_list[index]
+			if("thief")
+				new_list += ROLE_THIEF
+				new_list[ROLE_THIEF] = check_list[index]
+			if("nothing")
+				new_list += ROLE_NONE
+				new_list[ROLE_NONE] = check_list[index]
+			if("devil")
+				new_list += ROLE_DEVIL
+				new_list[ROLE_DEVIL] = check_list[index]
+			else
+				new_list += index
+				new_list[index] = check_list[index]
+	return new_list
 
 #undef ROUNDSTART_LOGOUT_REPORT_TIME
 #undef STATION_GOAL_BUDGET

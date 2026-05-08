@@ -60,21 +60,6 @@
 	var/list/modifiers = params2list(params)
 
 	if(LAZYACCESS(modifiers, MIDDLE_CLICK))
-		if(LAZYACCESS(modifiers, SHIFT_CLICK))
-			if(LAZYACCESS(modifiers, ALT_CLICK))
-				MiddleShiftAltClickOn(A)
-				return
-			if(LAZYACCESS(modifiers, CTRL_CLICK))
-				MiddleControlClickOn(A)
-				return
-			MiddleShiftClickOn(A)
-			return
-		if(LAZYACCESS(modifiers, CTRL_CLICK))
-			MiddleControlClickOn(A)
-			return
-		if(LAZYACCESS(modifiers, ALT_CLICK))
-			MiddleAltClickOn(A)
-			return
 		MiddleClickOn(A)
 		if(controlled_mech)
 			controlled_mech.click_action(A, src, params)
@@ -270,53 +255,3 @@
 /obj/machinery/ai_slipper/ai_click_alt(mob/living/silicon/ai/user) //Dispenses liquid if on
 	Activate()
 	return CLICK_ACTION_SUCCESS
-
-// AREAS
-
-/mob/living/silicon/ai/proc/MiddleControlClickOn(atom/A)
-	if(!ismalfAI(mind))
-		return
-	var/turf/turf = get_turf(A)
-	if(!turf)
-		return
-	var/area/area = get_area(turf)
-	if(!area)
-		return
-	for(var/obj/machinery/door/airlock/airlock in area.machinery_cache)
-		airlock.AICtrlClick(src)
-
-/mob/living/silicon/ai/MiddleShiftClickOn(atom/A)
-	if(!ismalfAI(mind))
-		return
-	var/turf/turf = get_turf(A)
-	if(!turf)
-		return
-	var/area/area = get_area(turf)
-	if(!area)
-		return
-	for(var/obj/machinery/door/airlock/airlock in area.machinery_cache)
-		airlock.AIShiftClick(src)
-
-/mob/living/silicon/ai/proc/MiddleAltClickOn(atom/A)
-	if(!ismalfAI(mind))
-		return
-	var/turf/turf = get_turf(A)
-	if(!turf)
-		return
-	var/area/area = get_area(turf)
-	if(!area)
-		return
-	for(var/obj/machinery/door/airlock/airlock in area.machinery_cache)
-		airlock.ai_click_alt(src)
-
-/mob/living/silicon/ai/proc/MiddleShiftAltClickOn(atom/A)
-	if(!ismalfAI(mind))
-		return
-	var/turf/turf = get_turf(A)
-	if(!turf)
-		return
-	var/area/area = get_area(turf)
-	if(!area)
-		return
-	for(var/obj/machinery/door/airlock/airlock in area.machinery_cache)
-		airlock.AIAltShiftClick(src)

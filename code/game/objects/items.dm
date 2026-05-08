@@ -237,7 +237,6 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 
 	//Clockwork enchantment
 	/// What's the type on enchantment on it? 0
-	var/enchant_type = NO_SPELL
 	/// List(datum)
 	var/list/enchants = null
 
@@ -342,7 +341,6 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 
 /obj/item/Destroy()
 	item_flags &= ~DROPDEL	//prevent reqdels
-	QDEL_NULL(hidden_uplink)
 
 	if(ismob(loc))
 		var/mob/M = loc
@@ -410,16 +408,6 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 	else
 		return TRUE
 
-/obj/item/blob_act(obj/structure/blob/B)
-	if(B && B.loc == loc && !QDELETED(src) && !(obj_flags & IGNORE_BLOB_ACT))
-		obj_destruction(MELEE)
-
-/obj/item/blob_vore_act(obj/structure/blob/special/core/voring_core)
-	. = ..()
-	if(QDELETED(src))
-		return FALSE
-	forceMove(voring_core)
-
 /obj/item/examine(mob/user)
 	var/size
 	switch(src.w_class)
@@ -460,14 +448,6 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 			msg += span_danger("Пригодные материалы отсутствуют.<br>")
 		msg += "*--------*"
 		. += msg
-
-	if(isclocker(user) && enchant_type)
-		if(enchant_type == CASTING_SPELL)
-			. += span_notice("Предыдущее заклинание еще активно!<br>")
-		for(var/datum/spell_enchant/S in enchants)
-			if(S.enchantment == enchant_type)
-				. += span_notice("Обнаружено запечатанное заклинание \"[S.name]\" внутри.<br>")
-				break
 
 	if(exists_skin_change)
 		. += span_notice("Используйте <b>Alt+ЛКМ</b>, чтобы выбрать скин.")
@@ -560,25 +540,6 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
  */
 /obj/item/proc/allow_attack_hand_drop(mob/user)
 	return TRUE
-
-/**
- * If xenos can manipulate with this item.
- */
-/obj/item/proc/allowed_for_alien()
-	return FALSE
-
-/obj/item/attack_alien(mob/user)
-	var/mob/living/carbon/alien/A = user
-
-	if(!A.has_fine_manipulation)
-		to_chat(user, span_warning("Ваши когти не способны к такой точной работе!"))
-		return
-
-	if(!allowed_for_alien())
-		to_chat(user, span_warning("Похоже, [declent_ru(NOMINATIVE)] мне бесполезен!"))
-		return
-
-	attack_hand(A)
 
 /obj/item/attack_ai(mob/user as mob)
 	if(istype(src.loc, /obj/item/robot_module))
@@ -1263,16 +1224,6 @@ GLOBAL_DATUM_INIT(fire_overlay, /mutable_appearance, mutable_appearance('icons/g
 		materials_coeff = 1 / new_coeff
 	for(var/material in materials)
 		materials[material] *= materials_coeff
-
-/obj/item/proc/deplete_spell()
-	enchant_type = NO_SPELL
-	var/enchant_action = locate(/datum/action/item_action/activate/enchant) in actions
-	if(enchant_action)
-		qdel(enchant_action)
-	update_icon()
-
-/obj/item/proc/add_enchant()
-	return
 
 /obj/item/update_atom_colour()
 	. = ..()

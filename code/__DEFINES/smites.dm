@@ -35,9 +35,7 @@ GLOBAL_LIST_INIT(smites_not_human, list(
 	SMITE_LIGHTING = /datum/smite/lighting,
 	SMITE_GIB = /datum/smite/gib,
 	SMITE_HUNTER = /datum/smite/hunter,
-	SMITE_TRAITORHUNTER = /datum/smite/traitor_hunter,
 	SMITE_TRANSFORM = /datum/smite/transform,
-	SMITE_ROD = /datum/smite/rod,
 	SMITE_DUST = /datum/smite/dust,
 	SMITE_SUMMON = /datum/smite/summon,
 	SMITE_POD = /datum/smite/pod,
@@ -51,7 +49,6 @@ GLOBAL_LIST_INIT(smites_not_human, list(
 GLOBAL_LIST_INIT(smites_human, list(
 	SMITE_BRAINLOSS = /datum/smite/brainloss,
 	SMITE_HONKTUMOR = /datum/smite/honktumor,
-	SMITE_CLUWNE = /datum/smite/cluwne,
 	SMITE_HUNGER = /datum/smite/hunger,
 	SMITE_ANTIDROP_EQUIP = /datum/smite/antidrop_equip,
 	SMITE_NUGGET = /datum/smite/nugget,

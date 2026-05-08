@@ -82,8 +82,3 @@
 				text += "<br/><b>[blob.key]</b> был <b>[blob.name]</b>"
 
 		return text.Join("")
-
-/datum/game_mode/proc/end_game()
-	if(!SSticker)
-		return
-	SSticker.current_state = GAME_STATE_FINISHED

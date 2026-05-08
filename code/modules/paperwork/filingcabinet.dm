@@ -210,16 +210,7 @@ GLOBAL_LIST_EMPTY(employmentContracts)
 	return ..()
 
 /obj/structure/filingcabinet/employment/proc/fillCurrent()
-	//This proc fills the cabinet with the current crew.
-	for(var/record in GLOB.data_core.locked)
-		var/datum/data/record/G = record
-		if(!G)
-			continue
-		if(G.fields["reference"])
-			addFile(G.fields["reference"])
-
-/obj/structure/filingcabinet/employment/proc/addFile(mob/living/carbon/human/employee)
-	new /obj/item/paper/contract/employment(src, employee)
+	return // idk, I am tired
 
 /obj/structure/filingcabinet/employment/attack_hand(mob/user)
 	if(cooldown)

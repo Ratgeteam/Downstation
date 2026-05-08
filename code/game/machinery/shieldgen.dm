@@ -49,10 +49,6 @@
 			if(prob(50))
 				qdel(src)
 
-/obj/machinery/shield/blob_act()
-	if(!QDELETED(src))
-		qdel(src)
-
 /obj/machinery/shield/cult
 	name = "cult barrier"
 	desc = "A shield summoned by cultists to keep heretics away."
@@ -82,20 +78,6 @@
 /obj/machinery/shield/cult/barrier/Initialize(mapload)
 	. = ..()
 	invisibility = INVISIBILITY_ABSTRACT
-
-/obj/machinery/shield/cult/barrier/Destroy()
-	if(parent_rune && !QDELETED(parent_rune))
-		QDEL_NULL(parent_rune)
-	return ..()
-
-/obj/machinery/shield/cult/barrier/attack_hand(mob/living/user)
-	parent_rune.attack_hand(user)
-
-/obj/machinery/shield/cult/barrier/attack_animal(mob/living/simple_animal/user)
-	if(iscultist(user))
-		parent_rune.attack_animal(user)
-	else
-		..()
 
 /**
 * Turns the shield on and off.

@@ -159,8 +159,6 @@
 				msg += "[GEND_HE_SHE_CAP(src)] нос[PLUR_IT_YAT(src)] [icon2html(gloves, user)] <b>[gloves.declent_ru(NOMINATIVE)]</b> на руках.\n"
 		else if(blood_DNA)
 			msg += "[GEND_HIS_HER_CAP(src)] руки [hand_blood_color != "#030303" ? "измазаны кровью":"измазаны маслом"].\n"
-		else if(isclocker(src) && HAS_TRAIT(src, TRAIT_CLOCK_HANDS))
-			msg += span_clockitalic("[GEND_HIS_HER_CAP(src)] руки сверкают янтарём.\n")
 
 	//handcuffed?
 	if(handcuffed)
@@ -362,9 +360,6 @@
 	if(dna.species.can_be_pale && blood_volume < BLOOD_VOLUME_PALE && ((get_covered_bodyparts() & FULL_BODY) != FULL_BODY))
 		msg += span_warning("У н[GEND_HIS_HER(src)] бледная кожа.\n")
 
-	var/datum/antagonist/vampire/vampire_datum = mind?.has_antag_datum(/datum/antagonist/vampire)
-	if(istype(vampire_datum) && vampire_datum.draining)
-		msg += span_warning("<b>[GEND_HE_SHE_CAP(src)] впил[GEND_SYA_AS_OS_IS(src)] своими клыками в шею [vampire_datum.draining].\n</b>")
 
 	for(var/obj/item/organ/external/bodypart as anything in bodyparts)
 		if(!bodypart.tourniquet)
@@ -410,9 +405,6 @@
 
 		if(HAS_TRAIT_FROM(src, TRAIT_AI_UNTRACKABLE, CHANGELING_TRAIT))
 			msg += span_italics("[GEND_HE_SHE_CAP(src)] двигает своё тело неестественно и откровенно нечеловеческим образом.\n")
-
-	if(!(skipface || (wear_mask && (wear_mask.flags_inv & HIDENAME || wear_mask.flags_cover & MASKCOVERSMOUTH))) && is_thrall(src) && in_range(user,src))
-		msg += span_italics("[GEND_HIS_HER_CAP(src)] черты лица выглядят неестественно напряжёнными и застывшими.\n")
 
 	var/obj/item/organ/internal/cyberimp/tail/blade/implant = get_organ_slot(INTERNAL_ORGAN_TAIL_DEVICE)
 	if(istype(implant) && implant.activated)

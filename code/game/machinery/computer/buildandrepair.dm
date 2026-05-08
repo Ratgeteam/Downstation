@@ -415,23 +415,6 @@
 	build_path = /obj/machinery/computer/supplyquest/workers
 	origin_tech = "programming=3"
 
-/obj/item/circuitboard/syndicatesupplycomp
-	board_name = "Syndicate Supply Pad Console"
-	greyscale_colors = CIRCUIT_COLOR_SUPPLY
-	build_path = /obj/machinery/computer/syndie_supplycomp
-	origin_tech = "programming=3;syndicate=3"
-
-/obj/item/circuitboard/syndicatesupplycomp/public
-	board_name = "Syndicate Public Supply Pad Console"
-	build_path = /obj/machinery/computer/syndie_supplycomp/public
-
-/obj/item/circuitboard/syndicate_teleporter
-	board_name = "Syndicate Redspace Teleporter"
-	icon_state = "syndicate_circuit"
-	greyscale_config = null
-	build_path = /obj/machinery/computer/syndicate_depot/teleporter/taipan
-	origin_tech = "programming=6;bluespace=5;syndicate=8"
-
 /obj/item/circuitboard/operating
 	board_name = "Operating Computer"
 	greyscale_colors = CIRCUIT_COLOR_MEDICAL
@@ -855,21 +838,6 @@
 
 /obj/structure/computerframe/HONKputer/circuit_compatibility_check(obj/item/circuitboard/circuit)
 	return circuit.board_type == "HONKputer"
-
-/obj/structure/computerframe/abductor
-	icon_state = "comp_frame_alien1"
-
-/obj/structure/computerframe/abductor/update_icon_state()
-	icon_state = "comp_frame_alien[state]"
-
-/obj/structure/computerframe/abductor/on_construction(obj/machinery/computer/computer)
-	..()
-	computer.abductor = TRUE
-	computer.max_integrity = 400
-	computer.update_integrity(400)
-
-/obj/structure/computerframe/abductor/drop_computer_materials(location)
-	new /obj/item/stack/sheet/mineral/abductor(location, 4)
 
 /obj/structure/computerframe/cargo
 	name = "cargo R&D console frame"

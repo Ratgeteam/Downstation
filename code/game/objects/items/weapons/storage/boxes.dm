@@ -393,16 +393,6 @@
 	for(var/I in 1 to 7)
 		new /obj/item/areaeditor/permit(src)
 
-/obj/item/storage/box/syndicate_permits
-	name = "box of syndicate construction permits"
-	desc = "A box for containing construction permits, used to officially declare built rooms as additions to the station."
-	icon_state = "syndie_id"
-	item_state = "syndie"
-
-/obj/item/storage/box/syndicate_permits/populate_contents()
-	for(var/I in 1 to 7)
-		new /obj/item/areaeditor/permit/syndicate(src)
-
 /obj/item/storage/box/ids
 	name = "spare IDs"
 	desc = "Has so many empty IDs."
@@ -979,36 +969,6 @@
 	playsound(loc, SFX_RUSTLE, 50, TRUE, -5)
 	user.visible_message(span_notice("[user] hugs \the [src]."),span_notice("You hug \the [src]."))
 
-/obj/item/storage/box/wizard
-	name = "magical box"
-	desc = "It's just an ordinary magical box."
-	icon_state = "box_wiz"
-	item_state = "wizard"
-
-/obj/item/storage/box/wizard/hardsuit
-	name = "Battlemage Armour Bundle"
-	desc = "This box contains a bundle of Battlemage Armour"
-
-/obj/item/storage/box/wizard/hardsuit/populate_contents()
-	new /obj/item/clothing/suit/space/hardsuit/wizard/shielded(src)
-	new /obj/item/clothing/shoes/magboots/wizard(src)
-
-/obj/item/storage/box/wizard/recharge
-	name = "Armour Recharge Bundle"
-	desc = "This box contains a bundle of Battlemage Armour Recharges"
-
-/obj/item/storage/box/wizard/recharge/populate_contents()
-	for(var/I in 1 to 3)
-		new /obj/item/wizard_armour_charge(src)
-
-/obj/item/storage/box/wizard/kit_spell_book
-	name = "набор волшебных книг"
-	desc = "Набор волшебных книг, купленных в волшебной книге, для волшебников, чтобы делать волшебство! ЗВУЧИТ ПРОСТО ВОЛШЕБНО!"
-
-/obj/item/storage/box/wizard/kit_spell_book/populate_contents()
-	for(var/i in 1 to 4)
-		new /obj/item/spellbook/oneuse/random(src)
-
 /obj/item/storage/box/hardsuit
 	icon_state = "box_ert"
 	item_state = "ert"
@@ -1206,25 +1166,6 @@
 		new /obj/item/grenade/megafauna_hardmode(src)
 	new /obj/item/storage/lockbox/medal/hardmode_box(src)
 	new /obj/item/paper/hardmode(src)
-
-/obj/item/storage/box/random_syndi
-	icon_state = "box_of_doom"
-	item_state = "syndie"
-	var/static/list/allowed_uplink_items
-
-/obj/item/storage/box/random_syndi/populate_contents()
-	if(!allowed_uplink_items)
-		allowed_uplink_items = list()
-		for(var/datum/uplink_item/uplink_item as anything in GLOB.uplink_items)
-			if(istype(uplink_item, /datum/uplink_item/racial) || uplink_item.hijack_only || uplink_item.cost > 20)
-				continue
-			allowed_uplink_items += uplink_item.item
-
-	if(!length(allowed_uplink_items))
-		return
-
-	for(var/item_path in pick_multiple_unique(allowed_uplink_items, 3))
-		new item_path(src)
 
 /obj/item/storage/box/crayfish_bucket
 	name = "Mr. Chang's Spicy Lobsters"

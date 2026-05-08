@@ -47,17 +47,6 @@
 	if(!ATTACK_CHAIN_SUCCESS_CHECK(.))
 		return .
 
-	var/datum/antagonist/vampire/vamp = target.mind?.has_antag_datum(/datum/antagonist/vampire)
-	if(ishuman(user) && vamp && !vamp.get_ability(/datum/vampire_passive/full) && user.mind.isholy)
-		to_chat(target, span_warning("The nullrod's power interferes with your own!"))
-		switch(vamp.nullification)
-			if(OLD_NULLIFICATION)
-				vamp.base_nullification()
-
-			if(NEW_NULLIFICATION)
-				vamp.adjust_nullification(30 + sanctify_force, 15 + sanctify_force)
-		return .
-
 /obj/item/nullrod/pickup(mob/living/user)
 	if(sanctify_force && !user.mind?.isholy)
 		user.take_overall_damage(force, sanctify_force)
@@ -323,45 +312,6 @@
 	attack_verb = list("рубанул", "порезал")
 	var/possessed = FALSE
 
-/obj/item/nullrod/scythe/talking/attack_self(mob/living/user)
-	if(possessed)
-		return
-
-	to_chat(user, "You attempt to wake the spirit of the blade...")
-
-	possessed = TRUE
-
-	var/list/mob/dead/observer/candidates = SSghost_spawns.poll_candidates("Do you want to play as the spirit of [user.real_name]'s blade?", ROLE_PAI, FALSE, 10 SECONDS, source = src)
-	var/mob/dead/observer/theghost = null
-	
-	if(QDELETED(src))
-		return
-
-	if(length(candidates))
-		theghost = pick(candidates)
-		var/mob/living/simple_animal/shade/sword/S = new(src)
-		S.real_name = name
-		S.name = name
-		S.possess_by_player(theghost.ckey)
-		var/input = tgui_input_text(S, "What are you named?", "Change Name", max_length = MAX_NAME_LEN)
-
-		if(src && input)
-			name = input
-			S.real_name = input
-			S.name = input
-		log_game("[S.ckey] has become spirit of [user.real_name]'s nullrod blade.")
-	else
-		log_game("No one has decided to possess [user.real_name]'s nullrod blade.")
-		to_chat(user, "The blade is dormant. Maybe you can try again later.")
-		possessed = FALSE
-
-/obj/item/nullrod/scythe/talking/Destroy()
-	for(var/mob/living/simple_animal/shade/sword/S in contents)
-		to_chat(S, "You were destroyed!")
-		S.ghostize()
-		qdel(S)
-	return ..()
-
 /obj/item/nullrod/hammmer
 	name = "relic war hammer"
 	icon_state = "hammeron"
@@ -426,16 +376,6 @@
 /obj/item/nullrod/whip/New()
 	..()
 	desc = "What a terrible night to be on the [station_name()]."
-
-/obj/item/nullrod/whip/afterattack(atom/movable/AM, mob/user, proximity, params)
-	if(!proximity)
-		return
-	if(ishuman(AM))
-		var/mob/living/carbon/human/H = AM
-		if(is_shadow(H))
-			var/phrase = pick("Die monster! You don't belong in this world!!!", "You steal men's souls and make them your slaves!!!", "Your words are as empty as your soul!!!", "Mankind ill needs a savior such as you!!!")
-			user.say("[phrase]")
-			H.adjustBruteLoss(12) //Bonus damage
 
 /obj/item/nullrod/fedora
 	name = "binary fedora"
@@ -599,28 +539,6 @@
 		praying = FALSE
 		return .
 
-	if(iscultist(target))
-		SSticker.mode.remove_cultist(target.mind) // This proc will handle message generation.
-		praying = FALSE
-		return .|ATTACK_CHAIN_SUCCESS
-
-	if(isclocker(target))
-		SSticker.mode.remove_clocker(target.mind)
-		praying = FALSE
-		return .|ATTACK_CHAIN_SUCCESS
-
-	var/datum/antagonist/vampire/vamp = target.mind?.has_antag_datum(/datum/antagonist/vampire)
-	if(vamp && !vamp.get_ability(/datum/vampire_passive/full)) // Getting a full prayer off on a vampire will interrupt their powers for a large duration.
-		switch(vamp.nullification)
-			if(OLD_NULLIFICATION)
-				vamp.adjust_nullification(120, 120)
-
-			if(NEW_NULLIFICATION)
-				vamp.adjust_nullification(120, 50)
-		to_chat(target, span_userdanger("[user]'s prayer to [SSticker.Bible_deity_name] has interfered with your power!"))
-		praying = FALSE
-		return .|ATTACK_CHAIN_SUCCESS
-
 	if(!prob(25))
 		praying = FALSE
 		return .
@@ -641,12 +559,6 @@
 	var/mob/living/carbon/human/holder = loc
 	if(!holder.l_hand == src && !holder.r_hand == src) // Holding this in your hand will
 		return
-	for(var/mob/living/carbon/human/target in range(5, loc))
-		var/datum/antagonist/vampire/vamp = target.mind?.has_antag_datum(/datum/antagonist/vampire)
-		if(vamp && vamp.nullification == OLD_NULLIFICATION && !vamp.get_ability(/datum/vampire_passive/full))
-			vamp.adjust_nullification(5, 2)
-			if(prob(10))
-				to_chat(target, span_userdanger("Being in the presence of [holder]'s [src] is interfering with your powers!"))
 
 /obj/item/nullrod/salt
 	name = "Holy Salt"
@@ -810,13 +722,8 @@
 		to_chat(missionary, span_warning("Your concentration was broken!"))
 
 /obj/item/nullrod/missionary_staff/proc/do_convert(mob/living/carbon/human/target, mob/living/carbon/human/missionary)
-	var/convert_duration = 10 MINUTES
 
 	if(!target || !ishuman(target) || !missionary || !ishuman(missionary))
-		return
-	if(ismindslave(target) || target.mind.zealot_master)	//mindslaves and zealots override the staff because the staff is just a temporary mindslave
-		to_chat(missionary, span_warning("Your faith is strong, but [target.p_their()] mind is already slaved to someone else's ideals. Perhaps an inquisition would reveal more..."))
-		faith -= 25		//same faith cost as losing sight of them mid-conversion, but did you just find someone who can lead you to a fellow traitor?
 		return
 	if(ismindshielded(target))
 		faith -= 75
@@ -841,7 +748,7 @@
 		to_chat(missionary, span_notice("You successfully convert [target] to your cause. The following grows because of your faith!"))
 		faith -= 100
 	//if you made it this far: congratulations! you are now a religious zealot!
-	target.mind.make_zealot(missionary, convert_duration, team_color)
+	// target.mind.make_zealot(missionary, convert_duration, team_color)
 
 	SEND_SOUND(target, sound('sound/misc/wololo.ogg', volume = 25))
 	missionary.say("WOLOLO!")

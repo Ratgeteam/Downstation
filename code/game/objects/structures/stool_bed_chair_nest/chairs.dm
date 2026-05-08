@@ -18,17 +18,6 @@
 	var/comfort = 0.3
 	var/flip_on_buckled_move = TRUE
 
-/obj/structure/chair/narsie_act()
-	if(prob(20))
-		var/obj/structure/chair/wood/W = new/obj/structure/chair/wood(get_turf(src))
-		W.setDir(dir)
-		qdel(src)
-
-/obj/structure/chair/ratvar_act()
-	var/obj/structure/chair/brass/B = new(get_turf(src))
-	B.setDir(dir)
-	qdel(src)
-
 /obj/structure/chair/Move(atom/newloc, direct = NONE, glide_size_override = 0, update_dir = TRUE)
 	. = ..()
 	handle_rotation()
@@ -504,60 +493,6 @@
 	item_chair = null
 	comfort = 0
 	flip_on_buckled_move = FALSE
-
-// Brass chair
-/obj/structure/chair/brass
-	name = "brass chair"
-	desc = "A spinny chair made of brass. It looks uncomfortable."
-	icon_state = "brass_chair"
-	max_integrity = 150
-	buildstacktype = /obj/item/stack/sheet/brass
-	item_chair = null
-	comfort = 0.2
-	var/turns = 0
-	flip_on_buckled_move = FALSE
-
-/obj/structure/chair/brass/Destroy()
-	STOP_PROCESSING(SSfastprocess, src)
-	. = ..()
-
-/obj/structure/chair/brass/process()
-	setDir(turn(dir, -90))
-	playsound(src, 'sound/effects/servostep.ogg', 50, FALSE)
-	turns++
-	if(turns >= 8)
-		STOP_PROCESSING(SSfastprocess, src)
-
-/obj/structure/chair/brass/ratvar_act()
-	return
-
-/obj/structure/chair/brass/click_alt(mob/living/user)
-	add_fingerprint(user)
-	turns = 0
-	if(!isprocessing)
-		user.visible_message(span_notice("[user] spins [src] around, and Ratvarian technology keeps it spinning FOREVER."), \
-		span_notice("Automated spinny chairs. The pinnacle of Ratvarian technology."))
-		START_PROCESSING(SSfastprocess, src)
-	else
-		user.visible_message(span_notice("[user] stops [src]'s uncontrollable spinning."), \
-		span_notice("You grab [src] and stop its wild spinning."))
-		STOP_PROCESSING(SSfastprocess, src)
-	return CLICK_ACTION_SUCCESS
-
-/obj/structure/chair/brass/fake
-	desc = "A spinny chair made of brass. It looks uncomfortable. Totally not magic!"
-	buildstacktype = /obj/item/stack/sheet/brass_fake
-
-/obj/structure/chair/comfy/abductor
-	name = "alien chair"
-	desc = "Alien chair. It look strange but comfortable."
-	icon_state = "alien_chair"
-	anchored = TRUE
-	max_integrity = 375
-	buildstacktype = /obj/item/stack/sheet/mineral/abductor
-
-/obj/structure/chair/comfy/abductor/GetArmrest()
-	return mutable_appearance('icons/obj/chairs.dmi', "alien_chair_armrest")
 
 /obj/structure/chair/comfy/mouse
 	name = "Кресло Господина Мышкина"

@@ -798,7 +798,7 @@ GLOBAL_DATUM_INIT(dview_mob, /mob/dview, new)
 	var/selected_borg_name = null
 	var/list/available_borgs = list()
 	for(var/mob/living/silicon/robot/borg in GLOB.player_list)
-		if(borg.stat == DEAD || borg.connected_ai || borg.scrambledcodes || isdrone(borg) || iscogscarab(borg) || isclocker(borg))
+		if(borg.stat == DEAD || borg.connected_ai || borg.scrambledcodes || isdrone(borg))
 			continue
 		var/borg_name = "[borg.real_name] ([borg.modtype?.name] [borg.braintype])"
 		available_borgs[borg_name] = borg
@@ -814,8 +814,6 @@ GLOBAL_DATUM_INIT(dview_mob, /mob/dview, new)
 		if(ai.stat == DEAD)
 			continue
 		if(ai.control_disabled)
-			continue
-		if(isclocker(ai)) // The active AIs list used for uploads. Avoid changing laws even if the AI is fully converted
 			continue
 		. += ai
 	return .
@@ -934,8 +932,6 @@ GLOBAL_DATUM_INIT(dview_mob, /mob/dview, new)
 	for(var/mob/living/simple_animal/slime/mob_instance in sorted_mobs)
 		mob_list.Add(mob_instance)
 	for(var/mob/living/simple_animal/mob_instance in sorted_mobs)
-		mob_list.Add(mob_instance)
-	for(var/mob/camera/blob/mob_instance in sorted_mobs)
 		mob_list.Add(mob_instance)
 
 	return mob_list

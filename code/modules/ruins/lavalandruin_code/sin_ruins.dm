@@ -73,8 +73,6 @@
 		<span class='danger'>And see a bag full of dice. Confused, \
 		you take one... and the bag vanishes.</span>")
 
-	var/obj/item/dice/d20/fate/one_use/critical_fail = new(drop_location())
-	user.put_in_hands(critical_fail, ignore_anim = FALSE)
 	qdel(src)
 
 // Gluttony
@@ -98,9 +96,6 @@
 			return TRUE
 		else
 			to_chat(human_mover, span_warning("You're repulsed by even looking at [src]. Only a pig could force themselves to go through it."))
-
-	if(istype(mover, /mob/living/simple_animal/hostile/morph))
-		return TRUE
 
 // Pride
 /obj/structure/mirror/magic/pride //Pride's mirror: Used in the Pride ruin.

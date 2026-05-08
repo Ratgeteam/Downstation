@@ -72,7 +72,6 @@
 /turf/simulated/wall/ComponentInitialize()
 	if(!is_station_level(z))
 		return
-	AddComponent(/datum/component/blob_turf_consuming, 2)
 
 /turf/simulated/wall/MouseDrop_T(atom/dropping, mob/user, params)
 	//Adds the component only once. We do it here & not in Initialize() because there are tons of walls & we don't want to add to their init times
@@ -186,9 +185,6 @@
 		return ..()
 
 	return TRUE
-
-/turf/simulated/wall/blob_act(obj/structure/blob/B)
-	add_dent(WALL_DENT_HIT)
 
 /turf/simulated/wall/blob_consume()
 	dismantle_wall()
@@ -355,21 +351,6 @@
 /turf/simulated/wall/attack_hand(mob/user)
 	user.changeNext_move(CLICK_CD_MELEE)
 
-	if(isalien(user))
-		var/mob/living/carbon/alien/A = user
-		A.do_attack_animation(src)
-
-		if(A.environment_smash & ENVIRONMENT_SMASH_RWALLS)
-			dismantle_wall(1)
-			to_chat(A, span_notice("Вы проламываете стену."))
-			return
-		if(A.environment_smash & ENVIRONMENT_SMASH_WALLS)
-			to_chat(A, span_notice("Вы ударяетесь о стену."))
-			take_damage(A.obj_damage)
-			return
-
-		to_chat(A, span_notice("Вы толкаете стену, но ничего не происходит"))
-		return
 	if(rotting)
 		if(hardness <= 10)
 			to_chat(user, span_notice("Эта стена кажется довольно ненадёжной."))
@@ -403,10 +384,6 @@
 		return .|ATTACK_CHAIN_BLOCKED_ALL
 
 	if(try_wallmount(I, user, params))
-		user.changeNext_move(I.attack_speed)
-		return .|ATTACK_CHAIN_BLOCKED_ALL
-
-	if(try_reform(I, user, params))
 		user.changeNext_move(I.attack_speed)
 		return .|ATTACK_CHAIN_BLOCKED_ALL
 
@@ -545,15 +522,6 @@
 		return TRUE
 	return FALSE
 
-/turf/simulated/wall/proc/try_reform(obj/item/I, mob/user, params)
-	if(I.enchant_type == REFORM_SPELL && (src.type == /turf/simulated/wall)) //fuck
-		I.deplete_spell()
-		ChangeTurf(/turf/simulated/floor/plating)
-		new /obj/structure/falsewall/clockwork(src) //special falsewalls
-		playsound(src, 'sound/magic/cult_spell.ogg', 100, TRUE)
-		return TRUE
-	return FALSE
-
 /turf/simulated/wall/singularity_pull(S, current_size)
 	..()
 	wall_singularity_pull(current_size)
@@ -566,14 +534,6 @@
 	if(current_size == STAGE_FOUR)
 		if(prob(30))
 			dismantle_wall()
-
-/turf/simulated/wall/narsie_act()
-	if(prob(20))
-		ChangeTurf(/turf/simulated/wall/cult)
-
-/turf/simulated/wall/ratvar_act()
-	if(prob(20))
-		ChangeTurf(/turf/simulated/wall/clockwork)
 
 /turf/simulated/wall/acid_act(acidpwr, acid_volume)
 	if(explosion_block >= 2)

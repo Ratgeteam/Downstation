@@ -10,7 +10,6 @@
 	var/clock = 0
 	var/syndiemmi = 0 //Whether or not this is a Syndicate MMI
 	var/syndicate = 0 //Used to replace standart modules with the syndicate modules in module pick proc
-	var/ninja = FALSE //Like the syndicate, it is necessary to select modules.
 	var/mob/living/carbon/brain/brainmob = null//The current occupant.
 	var/obj/item/organ/internal/brain/held_brain = null // This is so MMI's aren't brainscrubber 9000's
 	var/mob/living/silicon/robot/robot = null//Appears unused.
@@ -91,7 +90,6 @@
 		brainmob.set_invis_see(initial(brainmob.see_invisible))
 		held_brain = brain
 		ADD_TRAIT(brainmob, TRAIT_NO_SPELLS, UNIQUE_TRAIT_SOURCE(src)) // Dont use spells, little brain.
-		alien = istype(brain, /obj/item/organ/internal/brain/xeno)
 		update_appearance(UPDATE_ICON_STATE|UPDATE_NAME)
 		if(radio_action)
 			radio_action.UpdateButtonIcon()

@@ -541,30 +541,6 @@
 	var/mob/dead/observer/G = usr
 	G.reenter_corpse()
 
-/atom/movable/screen/alert/ghost
-	name = "Призрак"
-	desc = "Хотите стать призраком? Вы получите уведомление, когда ваше тело извлекут из гнезда."
-	icon_state = "template"
-	timeout = 5 MINUTES // longer than any infection should be
-
-/atom/movable/screen/alert/ghost/Initialize(mapload, datum/hud/hud_owner)
-	. = ..()
-	var/image/I = image('icons/mob/mob.dmi', icon_state = "ghost", layer = FLOAT_LAYER, dir = SOUTH)
-	I.layer = FLOAT_LAYER
-	I.plane = FLOAT_PLANE
-	add_overlay(I)
-
-/atom/movable/screen/alert/ghost/Click()
-	var/mob/living/carbon/human/infected_user = usr
-	if(!istype(infected_user) || infected_user.stat == DEAD)
-		infected_user.clear_alert("ghost_nest")
-		return
-	var/obj/item/clothing/mask/facehugger/hugger_mask = infected_user.wear_mask
-	if(!istype(hugger_mask) || !(locate(/obj/item/organ/internal/body_egg/alien_embryo) in infected_user.internal_organs) || hugger_mask.sterile)
-		infected_user.clear_alert("ghost_nest")
-		return
-	infected_user.ghostize(TRUE)
-
 #define FLOAT_LAYER_TIME -1
 #define FLOAT_LAYER_STACKS -2
 #define FLOAT_LAYER_SELECTOR -3
@@ -672,26 +648,6 @@
 #undef FLOAT_LAYER_TIME
 #undef FLOAT_LAYER_STACKS
 #undef FLOAT_LAYER_SELECTOR
-
-/atom/movable/screen/alert/notify_soulstone
-	name = "Камень душ"
-	desc = "Кто-то пытается заключить вашу душу в камень. Нажмите, чтобы согласиться."
-	icon_state = "template"
-	timeout = 10 SECONDS
-	var/obj/item/soulstone/stone = null
-	var/stoner = null
-
-/atom/movable/screen/alert/notify_soulstone/Click()
-	if(!usr || !usr.client)
-		return
-	if(stone)
-		if(tgui_alert(usr, "[stoner] пытается заключить вашу душу в камень. \
-							Это уничтожит ваше тело и не позволит вернуться в игру как прежний персонаж. Согласны?", "Воскрешение", list("Нет", "Да")) ==  "Да")
-			stone?.opt_in = TRUE
-
-/atom/movable/screen/alert/notify_soulstone/Destroy()
-	stone = null
-	return ..()
 
 /atom/movable/screen/alert/notify_mapvote
 	name = "Голосование за карту"

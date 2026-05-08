@@ -57,126 +57,6 @@
 	belt = /obj/item/tank/internals/emergency_oxygen/double/vox
 	box = /obj/item/storage/box/survival/species/vox
 
-/datum/outfit/admin/syndicate
-	name = "Syndicate Agent"
-
-	uniform = /obj/item/clothing/under/syndicate
-	back = /obj/item/storage/backpack
-	belt = /obj/item/storage/belt/utility/full/multitool
-	gloves = /obj/item/clothing/gloves/combat
-	shoes = /obj/item/clothing/shoes/combat
-	l_ear = /obj/item/radio/headset/syndicate
-	id = /obj/item/card/id/syndicate
-	r_pocket = /obj/item/radio/uplink
-	backpack_contents = list(
-		/obj/item/storage/box/survival/engineer = 1,
-		/obj/item/flashlight = 1,
-		/obj/item/card/emag = 1,
-		/obj/item/reagent_containers/food/snacks/syndidonkpocket = 1,
-	)
-
-	var/id_access = SYNDICATE_AGENT
-	var/uplink_uses = 100
-
-/datum/outfit/admin/syndicate/post_equip(mob/living/carbon/human/H, visualsOnly = FALSE)
-	. = ..()
-	if(visualsOnly)
-		return
-
-	var/obj/item/card/id/I = H.wear_id
-	if(istype(I))
-		apply_to_card(I, H, get_syndicate_access(id_access), name, "syndie")
-
-	var/obj/item/radio/uplink/U = H.r_store
-	if(istype(U))
-		U.hidden_uplink.uplink_owner = "[H.key]"
-		if(!isnull(uplink_uses))
-			U.hidden_uplink.uses = uplink_uses
-
-	var/obj/item/radio/R = H.l_ear
-	if(istype(R))
-		R.set_frequency(SYND_FREQ)
-	H.faction |= "syndicate"
-
-/datum/outfit/admin/syndicate_infiltrator
-	name = "Syndicate Infiltrator"
-
-/datum/outfit/admin/syndicate_infiltrator/equip(mob/living/carbon/human/H, visualsOnly = FALSE)
-	. = H.equip_syndicate_infiltrator(0, 20, FALSE)
-	H.update_hud_set()
-	if(!visualsOnly)
-		H.faction |= "syndicate"
-
-/datum/outfit/admin/syndicate_strike_team
-	name = "Syndicate Strike Team Commando"
-	uniform = /obj/item/clothing/under/syndicate
-	back = /obj/item/storage/backpack/security
-	shoes =	/obj/item/clothing/shoes/combat
-	gloves = /obj/item/clothing/gloves/combat/swat/syndicate
-	l_ear = /obj/item/radio/headset/syndicate/alt/syndteam
-	l_pocket = /obj/item/card/emag
-	r_pocket = /obj/item/melee/energy/sword/saber/red
-	id = /obj/item/card/id/syndicate
-	box = /obj/item/storage/box/survival/survival_syndi
-	backpack_contents = list(
-		/obj/item/radio/uplink/sst = 1,
-		/obj/item/grenade/plastic/x4 = 2,
-		/obj/item/reagent_containers/hypospray/combat/nanites = 1,
-		/obj/item/gun/projectile/revolver = 1,
-		/obj/item/ammo_box/speedloader/a357 = 1,
-	)
-	implants = list(/obj/item/implant/dust)
-	can_be_admin_equipped = FALSE
-
-/datum/outfit/admin/syndicate_strike_team/equip(mob/living/carbon/human/H, visualsOnly = FALSE)
-	..()
-	var/obj/item/card/id/syndicate/I = H.wear_id
-	I.icon_state = "syndie"
-	I.name = "[H.real_name]’s ID Card"
-	I.assignment = "Syndicate Commando"
-	I.access += get_syndicate_access(I.assignment)
-	I.registered_name = H.real_name
-	if(!visualsOnly)
-		H.faction += "syndicate"
-
-/datum/outfit/admin/syndicate_strike_team/officer
-	name = "Syndicate Stirke Team Officer"
-	pda = /obj/item/pinpointer
-
-/datum/outfit/admin/syndicate_strike_team/officer/post_equip(mob/living/carbon/human/H, visualsOnly = FALSE)
-	.=..()
-	H.back.contents += new /obj/item/disk/nuclear/unrestricted
-
-/datum/outfit/admin/syndicate_strike_team/full_gear
-	can_be_admin_equipped = TRUE
-	toggle_helmet = TRUE
-	suit = /obj/item/clothing/suit/space/hardsuit/syndi/elite/sst
-	belt = /obj/item/storage/belt/military/sst
-	shoes = /obj/item/clothing/shoes/magboots/syndie/advance
-	mask = /obj/item/clothing/mask/gas/syndicate
-	glasses = /obj/item/clothing/glasses/thermal/sunglasses
-	l_hand = /obj/item/gun/projectile/automatic/l6_saw
-
-	backpack_contents = list(
-		/obj/item/tank/jetpack/oxygen/harness = 1,
-		/obj/item/radio/uplink/sst = 1,
-		/obj/item/ammo_box/magazine/a762x51 = 1,
-		/obj/item/grenade/plastic/x4 = 2,
-		/obj/item/reagent_containers/hypospray/combat/nanites = 1,
-		/obj/item/gun/projectile/revolver = 1,
-		/obj/item/ammo_box/speedloader/a357 = 1,
-	)
-
-/datum/outfit/admin/syndicate/spy
-	name = "Syndicate Spy"
-	uniform = /obj/item/clothing/under/suit_jacket/really_black
-	shoes = /obj/item/clothing/shoes/chameleon/noslip
-	uplink_uses = 200
-
-	implants = list(
-		/obj/item/implant/dust,
-	)
-
 /datum/outfit/admin/nt_vip
 	name = "VIP Guest"
 
@@ -339,7 +219,6 @@
 	backpack_contents = list(
 		/obj/item/storage/box/survival/engineer = 1,
 		/obj/item/flashlight = 1,
-		/obj/item/pinpointer/crew = 1,
 	)
 	implants = list(
 		/obj/item/implant/dust,
@@ -413,14 +292,6 @@
 		apply_to_card(I, H, get_centcom_access("Death Commando"), "Death Commando", "deathsquad")
 		I.photo = get_id_photo(H, custom_job = JOB_TITLE_REPRESENTATIVE) // They should go die with a good photo instead of assistants grey shorts xD
 	H.update_hud_set()
-
-/datum/outfit/admin/death_commando/officer
-	name = "NT Death Commando officer"
-	can_be_admin_equipped = FALSE
-
-/datum/outfit/admin/death_commando/officer/post_equip(mob/living/carbon/human/H, visualsOnly = FALSE)
-	.=..()
-	H.back.contents += new /obj/item/disk/nuclear/unrestricted
 
 /datum/outfit/admin/pirate
 	name = "Space Pirate"
@@ -554,7 +425,6 @@
 		/obj/item/ammo_box/magazine/m10mm = 1,
 		/obj/item/gun_module/muzzle/suppressor = 1,
 		/obj/item/card/emag = 1,
-		/obj/item/radio/uplink = 1,
 		/obj/item/reagent_containers/food/snacks/syndidonkpocket = 1,
 		/obj/item/flashlight = 1,
 	)
@@ -911,7 +781,6 @@
 	belt = /obj/item/melee/baton/security/loaded
 	l_hand = null
 	suit_store = /obj/item/gun/projectile/automatic/pistol/deagle
-	l_pocket = /obj/item/pinpointer/advpinpointer
 	l_ear = /obj/item/radio/headset/ert/alt/commander/solgov
 	backpack_contents = list(
 		/obj/item/storage/box/survival/responseteam = 1,
@@ -1248,122 +1117,6 @@
 	var/obj/item/card/id/I = H.wear_id
 	if(istype(I))
 		apply_to_card(I, H, get_all_accesses(), "Dark Lord", "syndie")
-
-/datum/outfit/admin/ancient_vampire
-	name = "Ancient Vampire"
-
-	uniform = /obj/item/clothing/under/victsuit/red
-	suit = /obj/item/clothing/suit/draculacoat
-	back = /obj/item/storage/backpack
-	gloves = /obj/item/clothing/gloves/combat
-	shoes = /obj/item/clothing/shoes/chameleon/noslip
-	l_ear = /obj/item/radio/headset/syndicate
-	id = /obj/item/card/id
-	backpack_contents = list(
-		/obj/item/storage/box/survival = 1,
-		/obj/item/flashlight = 1,
-		/obj/item/clothing/under/color/black = 1,
-	)
-
-/datum/outfit/admin/ancient_vampire/post_equip(mob/living/carbon/human/H, visualsOnly = FALSE)
-	. = ..()
-	if(visualsOnly)
-		return
-
-	var/obj/item/clothing/suit/hooded/chaplain_hoodie/C = new(H.loc)
-	if(istype(C))
-		C.name = "ancient robes"
-		C.hood.name = "ancient hood"
-		H.equip_to_slot_or_del(C, ITEM_SLOT_BACKPACK)
-
-	var/obj/item/card/id/I = H.wear_id
-	if(istype(I))
-		apply_to_card(I, H, get_all_accesses(), "Ancient One", "data")
-
-	if(!H.mind)
-		return
-
-	H.mind.make_vampire()
-	var/datum/antagonist/vampire/V = H.mind.has_antag_datum(/datum/antagonist/vampire)
-
-	if(!V)	// Just in case
-		return
-
-	V.bloodusable = 9999
-	V.bloodtotal = 9999
-	H.mind.offstation_role = TRUE
-	V.add_subclass(SUBCLASS_ANCIENT, FALSE)
-	H.mind.AddSpell(new /obj/effect/proc_holder/spell/shapeshift/bats)
-	H.mind.AddSpell(new /obj/effect/proc_holder/spell/shapeshift/hellhound)
-	H.force_gene_block(GLOB.jumpblock, TRUE)
-	H.gene_stability = 100
-
-/datum/outfit/admin/wizard
-	name = "Blue Wizard"
-	uniform = /obj/item/clothing/under/color/lightpurple
-	suit = /obj/item/clothing/suit/wizrobe
-	back = /obj/item/storage/backpack
-	shoes = /obj/item/clothing/shoes/sandal
-	head = /obj/item/clothing/head/wizard
-	l_ear = /obj/item/radio/headset
-	id = /obj/item/card/id
-	r_pocket = /obj/item/teleportation_scroll
-	l_hand = /obj/item/twohanded/staff
-	r_hand = /obj/item/spellbook
-	backpack_contents = list(
-		/obj/item/storage/box/survival/engineer = 1,
-	)
-
-/datum/outfit/admin/wizard/post_equip(mob/living/carbon/human/H, visualsOnly = FALSE)
-	. = ..()
-	if(visualsOnly)
-		return
-
-	var/obj/item/card/id/I = H.wear_id
-	if(istype(I))
-		apply_to_card(I, H, get_all_accesses(), "Wizard")
-
-/datum/outfit/admin/wizard/red
-	name = "Red Wizard"
-
-	suit = /obj/item/clothing/suit/wizrobe/red
-	head = /obj/item/clothing/head/wizard/red
-
-/datum/outfit/admin/wizard/marisa
-	name = "Marisa Wizard"
-
-	suit = /obj/item/clothing/suit/wizrobe/marisa
-	shoes = /obj/item/clothing/shoes/sandal/marisa
-	head = /obj/item/clothing/head/wizard/marisa
-
-/datum/outfit/admin/wizard/arch
-	name = "Arch Wizard"
-
-	suit = /obj/item/clothing/suit/wizrobe/magusred
-	head = /obj/item/clothing/head/wizard/magus
-	belt = /obj/item/storage/belt/wands/full
-	l_hand = null
-	backpack_contents = list(
-		/obj/item/storage/box/survival/engineer = 1,
-		/obj/item/clothing/suit/space/hardsuit/wizard/arch/shielded = 1,
-		/obj/item/clothing/shoes/magboots = 1,
-		/obj/item/kitchen/knife/ritual  = 1,
-		/obj/item/clothing/suit/wizrobe/red = 1,
-		/obj/item/clothing/head/wizard/red = 1,
-	)
-
-/datum/outfit/admin/wizard/arch/post_equip(mob/living/carbon/human/H, visualsOnly = FALSE)
-	. = ..()
-	if(visualsOnly)
-		return
-	var/obj/item/spellbook/B = H.r_hand
-	if(istype(B))
-		B.owner = H // force-bind it so it can never be stolen, no matter what.
-		B.name = "Archwizard Spellbook"
-		B.uses = 50
-	var/obj/item/card/id/I = H.wear_id
-	if(istype(I))
-		apply_to_card(I, H, get_all_accesses(), "Arch Wizard")
 
 /datum/outfit/admin/dark_priest
 	name = "Dark Priest"

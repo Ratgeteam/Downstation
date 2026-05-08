@@ -20,7 +20,6 @@
 	if(!prob(modules_spawn_chance))
 		return
 
-	new /obj/item/storage/box/syndie_kit/gun_mods/super(crate)
 
 /datum/loot_tier/first
 	name = "снаряжение зеленого кода"
@@ -238,7 +237,6 @@
 		/obj/item/clothing/suit/armor/vest/capcarapace,
 		/obj/item/clothing/suit/armor/vest/capcarapace/alt,
 		/obj/item/clothing/suit/armor/laserproof,
-		/obj/item/whetstone/cult,
 		/obj/item/implanter/emp,
 		/obj/item/storage/box/cyber_implants/reviver_hardened,
 		/obj/item/storage/box/cyber_implants/anti_stun_hardened,
@@ -416,7 +414,6 @@
 		/obj/item/shield/riot/buckler,
 		/obj/item/storage/belt/champion/wrestling,
 		/obj/item/shield/riot/roman,
-		/obj/item/storage/box/syndie_kit/commando_kit,
 		/obj/item/shield/riot,
 		/obj/item/melee/rapier/captain,
 		/obj/item/kitchen/knife/butcher/meatcleaver,
@@ -434,8 +431,6 @@
 		/obj/item/dnainjector/farvisionmut,
 		/obj/item/relict_production/strange_teleporter,
 		/obj/item/clothing/suit/space/hardsuit/syndi,
-		/obj/item/clothing/suit/space/hardsuit/contractor,
-		/obj/item/clothing/suit/space/hardsuit/contractor/agent,
 		/obj/item/clothing/suit/space/hardsuit/syndi/freedom,
 		/obj/item/clothing/suit/space/hardsuit/ert/security,
 		/obj/item/clothing/suit/space/hardsuit/ert/solgov,
@@ -467,7 +462,6 @@
 		/obj/item/clothing/suit/hooded/drake,
 		/obj/item/implanter/adrenalin/prototype,
 		/obj/item/implanter/krav_maga,
-		/obj/item/storage/box/syndie_kit/blackops_kit,
 	)
 
 /datum/loot_tier/fourth
@@ -576,7 +570,6 @@
 		),
 		/obj/item/CQC_manual,
 		/obj/item/mimejutsu_scroll,
-		/obj/item/storage/box/syndie_kit/mantisblade,
 		/obj/item/twohanded/dualsaber,
 		/obj/item/weldingtool/sword/double,
 		/obj/item/dnainjector/regenerate,
@@ -643,13 +636,6 @@
 		/obj/item/plasma_fist_scroll,
 		/obj/item/twohanded/knighthammer,
 		/obj/item/twohanded/chainsaw,
-		list(
-			/obj/item/melee/baton/telescopic/contractor,
-			/obj/item/baton_upgrade/cuff,
-			/obj/item/baton_upgrade/mute,
-			/obj/item/baton_upgrade/focus,
-			/obj/item/baton_upgrade/antidrop,
-		),
 		/obj/item/reagent_containers/hypospray/autoinjector/stimulants,
 		/obj/item/dnainjector/xraymut,
 		/obj/item/storage/firstaid/tactical,
@@ -860,7 +846,6 @@
 			/obj/item/stack/medical/bruise_pack/military,
 			/obj/item/stack/medical/suture/advanced,
 		),
-		/obj/item/reagent_containers/glass/bottle/abductor/rezadone,
 		list(
 			/obj/item/handheld_defibrillator,
 			/obj/item/defibrillator/compact/loaded

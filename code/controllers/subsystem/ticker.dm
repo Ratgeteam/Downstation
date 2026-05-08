@@ -182,7 +182,6 @@ SUBSYSTEM_DEF(ticker)
 		reboot_helper("Round ended.", "proper completion")
 
 /datum/controller/subsystem/ticker/proc/setup()
-	cultdat = setupcult()
 	score = new()
 
 	// Create and announce mode
@@ -458,11 +457,6 @@ SUBSYSTEM_DEF(ticker)
 					M.ghostize()
 					M.dust() //no mercy
 					CHECK_TICK
-		for(var/core in GLOB.blob_cores)
-			var/turf/T = get_turf(core)
-			if(T && is_station_level(T.z))
-				qdel(core)
-				CHECK_TICK
 
 	//Now animate the cinematic
 	switch(station_missed)
@@ -557,16 +551,12 @@ SUBSYSTEM_DEF(ticker)
 	GLOB.nologevent = TRUE //end of round murder and shenanigans are legal; there's no need to jam up  past this point.
 	if(toggle_gv)
 		set_observer_default_invisibility(0) //spooks things up
-	//Round statistics report
-	var/datum/station_state/ending_station_state = new /datum/station_state()
-	ending_station_state.count()
-	var/station_integrity = min(round( 100.0 *  GLOB.start_state.score(ending_station_state), 0.1), 100.0)
+
+	var/speed_round = FALSE
 
 	var/list/end_of_round_info = list()
 	end_of_round_info += "<br>[TAB]Shift Duration: <b>[SHIFT_TIME_TEXT()]</b>"
-	end_of_round_info += "<br>[TAB]Station Integrity: <b>[mode.station_was_nuked ? "<font color='red'>Destroyed</font>" : "[station_integrity]%"]</b>"
-	end_of_round_info += "<br>"
-	var/speed_round = FALSE
+
 	if(world.time - SSticker.round_start_time <= SPEEDRUN_ROUND_TIME)
 		speed_round = TRUE
 

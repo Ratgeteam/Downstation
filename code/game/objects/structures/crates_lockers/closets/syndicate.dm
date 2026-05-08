@@ -162,7 +162,6 @@
 	new /obj/item/storage/box/flashbangs(src)
 	new /obj/item/clothing/accessory/holster(src)
 	new /obj/item/clothing/accessory/stripedredscarf(src)
-	new /obj/item/storage/box/syndie_kit/chameleon(src)
 	new /obj/item/storage/secure/briefcase/syndie(src)
 	new /obj/item/megaphone(src)
 	new /obj/item/card/emag(src)
@@ -173,7 +172,6 @@
 	new /obj/item/storage/backpack/syndicate/command(src)
 	new /obj/item/storage/backpack/fluff/syndiesatchel(src)
 	new /obj/item/storage/backpack/duffel/syndie(src)
-	new /obj/item/storage/box/syndicate_permits(src)
 	new /obj/item/door_remote/taipan(src)
 	new /obj/item/clothing/neck/cloak/syndiecap/comms(src)
 
@@ -189,7 +187,6 @@
 	new /obj/item/dart_cartridge(src)
 	new /obj/item/dart_cartridge(src)
 	new /obj/item/clothing/accessory/rbscarf(src)
-	new /obj/item/storage/box/syndie_kit/chameleon(src)
 	new /obj/item/storage/secure/briefcase/syndie(src)
 	new /obj/item/megaphone(src)
 	new /obj/item/card/emag(src)
@@ -203,7 +200,6 @@
 	new /obj/item/storage/backpack/syndicate/command(src)
 	new /obj/item/storage/backpack/fluff/syndiesatchel(src)
 	new /obj/item/storage/backpack/duffel/syndie(src)
-	new /obj/item/storage/box/syndicate_permits(src)
 
 /obj/structure/closet/secure_closet/syndicate/cargo
 	name = "Syndicate Cargo Technician's Locker"

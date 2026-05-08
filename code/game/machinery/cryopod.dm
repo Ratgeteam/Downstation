@@ -226,7 +226,7 @@
 		/obj/item/mmi,
 		/obj/item/paicard,
 		/obj/item/gun,
-		/obj/item/pinpointer,
+
 		/obj/item/clothing/shoes/magboots,
 		/obj/item/areaeditor/blueprints,
 		/obj/item/clothing/head/helmet/space,
@@ -395,9 +395,6 @@
 		SSticker.score.save_antag_info(occupant.mind)
 
 	// Find a new sacrifice target if needed, if unable allow summoning
-	if(is_sacrifice_target(occupant.mind))
-		if(!SSticker.mode.cult_objs.find_new_sacrifice_target())
-			SSticker.mode.cult_objs.ready_to_summon()
 
 	// We should track when taipan players get despawned
 	if(occupant.mind in GLOB.taipan_players_active)
@@ -695,10 +692,6 @@
 	update_icon(UPDATE_ICON_STATE)
 	name = initial(name)
 
-//Attacks/effects.
-/obj/machinery/cryopod/blob_act()
-	return //Sorta gamey, but we don't really want these to be destroyed.
-
 /obj/machinery/computer/cryopod/robot
 	name = "robotic storage console"
 	desc = "Интерфейс управления системой контроля за робо-хранилищем."
@@ -748,10 +741,7 @@
 	var/list/free_cryopods = list()
 	var/list/free_syndie_cryopods = list()
 	for(var/obj/machinery/cryopod/P in SSmachines.get_by_type(/obj/machinery/cryopod))
-		if(!P.occupant && istype(get_area(P), /area/syndicate/unpowered/syndicate_space_base) && istype(P, /obj/machinery/cryopod/syndie))
-			free_syndie_cryopods += P
-		else if(!P.occupant && istype(get_area(P), /area/crew_quarters/sleep))
-			free_cryopods += P
+		free_cryopods += P
 	var/obj/machinery/cryopod/target_cryopod = null
 	if(length(free_cryopods))
 		if(person_to_cryo.find_taipan_hud_number_by_job()) //Если вернёт хоть что то значит тайпановец. Иначе вернёт null

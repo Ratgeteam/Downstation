@@ -1,82 +1,5 @@
 //Largely beneficial effects go here, even if they have drawbacks. An example is provided in Shadow Mend.
 
-/datum/status_effect/his_grace
-	id = "his_grace"
-	tick_interval = 0.4 SECONDS
-	alert_type = /atom/movable/screen/alert/status_effect/his_grace
-	var/bloodlust = 0
-	var/mend_fractures_chance = 3
-	var/regenerate_limbs_chance = 1
-
-/atom/movable/screen/alert/status_effect/his_grace
-	name = "Его Светлость"
-	desc = "Его Светлость голоден, и вы обязаны Его насытить."
-	icon_state = "his_grace"
-	alerttooltipstyle = "hisgrace"
-
-/atom/movable/screen/alert/status_effect/his_grace/MouseEntered(location,control,params)
-	desc = initial(desc)
-	var/datum/status_effect/his_grace/HG = attached_effect
-	desc += "[span_fontsize3("<br><b>Текущая кровожадность: [HG.bloodlust]</b>")]\
-	<br>Поглотит тебя на уровне кровожадности: [span_boldwarning("[HIS_GRACE_CONSUME_OWNER]")]"
-	return ..()
-
-/datum/status_effect/his_grace/on_apply()
-	owner.add_status_effect_absorption(source = id, effect_type = list(STUN, WEAKEN, STAMCRIT, PARALYZE, KNOCKDOWN))
-	ADD_TRAIT(owner, TRAIT_DEFLECT_BOLAS, HIS_GRACE_TRAIT)
-	owner.ignore_slowdown(TRAIT_STATUS_EFFECT(id))
-	return ..()
-
-/datum/status_effect/his_grace/on_remove()
-	owner.remove_status_effect_absorption(source = id, effect_type = list(STUN, WEAKEN, STAMCRIT, PARALYZE, KNOCKDOWN))
-	REMOVE_TRAIT(owner, TRAIT_DEFLECT_BOLAS, HIS_GRACE_TRAIT)
-	owner.unignore_slowdown(TRAIT_STATUS_EFFECT(id))
-
-/datum/status_effect/his_grace/tick(seconds_between_ticks)
-	var/mob/living/carbon/human/human = owner
-	bloodlust = 0
-	var/graces = 0
-	var/obj/item/his_grace/HG = human.find_item(/obj/item/his_grace)
-	if(HG)
-		if(HG.bloodthirst > bloodlust)
-			bloodlust = HG.bloodthirst
-		if(HG.awakened)
-			graces++
-	if(!graces)
-		human.apply_status_effect(/datum/status_effect/his_wrath)
-		qdel(src)
-		return
-	var/update = NONE
-	update |= human.heal_overall_damage(2.5, 2.5, updating_health = FALSE, affect_robotic = TRUE)
-	update |= human.heal_damages(tox = 2, oxy = 5, updating_health = FALSE)
-	update |= human.adjustCloneLoss(-2.5, FALSE)
-	update |= human.setStaminaLoss(0, FALSE)
-	if(update)
-		human.updatehealth()
-	remove_debuffs(human)
-	heal_bones(human)
-	regenerate_limbs(human)
-
-/datum/status_effect/his_grace/proc/remove_debuffs(mob/living/carbon/human/owner)
-	owner.AdjustDizzy(-20 SECONDS)
-	owner.AdjustDrowsy(-20 SECONDS)
-	owner.SetSleeping(0)
-	owner.SetSlowed(0)
-	owner.SetConfused(0)
-
-/datum/status_effect/his_grace/proc/heal_bones(mob/living/carbon/human/owner)
-	if(prob(100-mend_fractures_chance))
-		return
-
-	var/obj/item/organ/external/bodypart = safepick(owner.check_fractures())
-	bodypart?.mend_fracture()
-
-/datum/status_effect/his_grace/proc/regenerate_limbs(mob/living/carbon/human/owner)
-	if(prob(100-regenerate_limbs_chance))
-		return
-
-	owner.check_and_regenerate_organs()
-
 /datum/status_effect/shadow_mend
 	id = "shadow_mend"
 	duration = 30
@@ -457,50 +380,6 @@
 	if(tolerance <= 1 && length(active_instances) == 0)
 		qdel(src)
 
-/datum/status_effect/speedlegs
-	id = "gottagofast"
-	tick_interval = 4 SECONDS
-	alert_type = null
-	var/stacks = 0
-	/// A reference to the changeling's changeling antag datum.
-	var/datum/antagonist/changeling/cling
-
-/datum/status_effect/speedlegs/on_apply()
-	cling = owner?.mind?.has_antag_datum(/datum/antagonist/changeling)
-	owner.add_movespeed_modifier(/datum/movespeed_modifier/status_effect/strained_muscles)
-	return TRUE
-
-/datum/status_effect/speedlegs/tick(seconds_between_ticks)
-	if(owner.body_position == LYING_DOWN)
-		to_chat(owner, span_danger("Мы не можем использовать наши ноги, пока лежим!"))
-		qdel(src)
-	else if(owner.stat || owner.staminaloss >= 90 || cling.chem_charges <= (stacks + 1) * 3)
-		to_chat(owner, span_danger("Наши мышцы расслабляются, не имея энергии для напряжения."))
-		owner.Weaken(6 SECONDS)
-		qdel(src)
-	else
-		stacks++
-		cling.chem_charges -= stacks * 3 //At first the changeling may regenerate chemicals fast enough to nullify fatigue, but it will stack
-		if(stacks == 7) //Warning message that the stacks are getting too high
-			to_chat(owner, span_warning("Наши ноги начинают сильно болеть..."))
-
-/datum/status_effect/speedlegs/before_remove()
-	if(stacks < 3 && !(owner.stat || owner.staminaloss >= 90 || cling.chem_charges <= (stacks + 1) * 3)) //We don't want people to turn it on and off fast, however, we need it forced off if the 3 later conditions are met.
-		to_chat(owner, span_notice("Наши мышцы только что напряглись, они не расслабятся так быстро."))
-		return FALSE
-	return TRUE
-
-/datum/status_effect/speedlegs/on_remove()
-	owner.remove_movespeed_modifier(/datum/movespeed_modifier/status_effect/strained_muscles)
-	if(!owner.IsWeakened())
-		to_chat(owner, span_notice("Наши мышцы расслабляются."))
-		if(stacks >= 7)
-			to_chat(owner, span_danger("Мы падаем от истощения."))
-			owner.Weaken(6 SECONDS)
-			owner.emote("gasp")
-	cling.genetic_damage += stacks
-	cling = null
-
 /datum/status_effect/panacea
 	id = "panacea"
 	duration = 20 SECONDS
@@ -588,59 +467,6 @@
 	var/blood_cost_per_tick = 5
 	var/list/target_UIDs = list()
 	var/datum/antagonist/vampire/vamp
-
-/datum/status_effect/thrall_net/on_creation(mob/living/new_owner, datum/antagonist/vampire/V, ...)
-	. = ..()
-	vamp = V
-	START_PROCESSING(SSfastprocess, src)
-	target_UIDs += owner.UID()
-	var/list/view_cache = view(7, owner)
-	for(var/datum/mind/M in owner.mind.som.serv)
-		if(!M.has_antag_datum(/datum/antagonist/mindslave/thrall))
-			continue
-
-		if(!(M.current in view_cache))
-			continue
-
-		if(M.current.stat == DEAD)
-			continue
-
-		target_UIDs += M.current.UID()
-		M.current.Beam(owner, "sendbeam", time = 2 SECONDS, maxdistance = 7)
-
-/datum/status_effect/thrall_net/tick(seconds_between_ticks)
-	var/total_damage = 0
-	var/list/view_cache = view(7, owner)
-	for(var/uid in target_UIDs)
-		var/mob/living/L = locateUID(uid)
-		if(!(L in view_cache) || L.stat == DEAD)
-			target_UIDs -= uid
-			continue
-		total_damage += (L.maxHealth - L.health)
-		L.Beam(owner, "sendbeam", time = 2 SECONDS, maxdistance = 7)
-
-	var/average_damage = total_damage / length(target_UIDs)
-
-	for(var/uid in target_UIDs)
-		var/mob/living/L = locateUID(uid)
-		var/current_damage = L.maxHealth - L.health
-		if(current_damage == average_damage)
-			continue
-		if(current_damage > average_damage)
-			var/heal_amount = current_damage - average_damage
-			L.heal_ordered_damage(heal_amount, list(BRUTE, BURN, TOX, OXY, CLONE))
-		else
-			var/damage_amount = average_damage - current_damage
-			L.adjustFireLoss(damage_amount)
-
-	vamp.bloodusable = max(vamp.bloodusable - blood_cost_per_tick, 0)
-	if(!vamp.bloodusable || length(target_UIDs) <= 1) // if there is one left in the list, its only the vampire.
-		qdel(src)
-
-/datum/status_effect/thrall_net/on_remove()
-	. = ..()
-	vamp = null
-
 /datum/status_effect/bloodswell
 	id = "bloodswell"
 	duration = 30 SECONDS
@@ -668,12 +494,10 @@
 	human_owner.physiology.stamina_mod *= 0.3
 	human_owner.physiology.stun_mod *= 0.3
 
-	var/datum/antagonist/vampire/V = human_owner.mind.has_antag_datum(/datum/antagonist/vampire)
-	if(V.get_ability(/datum/vampire_passive/blood_swell_upgrade))
-		bonus_damage_applied = TRUE
-		human_owner.physiology.punch_damage_low += 14
-		human_owner.physiology.punch_damage_high += 14
-		human_owner.physiology.punch_stun_threshold += 10	//higher chance to stun but not 100%
+	bonus_damage_applied = TRUE
+	human_owner.physiology.punch_damage_low += 14
+	human_owner.physiology.punch_damage_high += 14
+	human_owner.physiology.punch_stun_threshold += 10	//higher chance to stun but not 100%
 
 /datum/status_effect/bloodswell/on_remove()
 	if(!ishuman(owner))

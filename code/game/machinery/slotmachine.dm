@@ -66,24 +66,12 @@ GLOBAL_LIST_EMPTY(slotmachine_prizes)
 	resultlvl = "green"
 	say_phrase = "Победитель!"
 
-/datum/slotmachine_prize/minimal/New(list/allowed_uplink_items)
-	..(allowed_uplink_items)
-	for(var/datum/uplink_item/uplink_item as anything in allowed_uplink_items)
-		if(uplink_item.cost <= 5)
-			available_prizes += uplink_item.item
-
 /datum/slotmachine_prize/small
 	id = "small"
 	chance = 8
 	credits = 200
 	resultlvl = "green"
 	say_phrase = "Победитель!"
-
-/datum/slotmachine_prize/small/New(list/allowed_uplink_items)
-	..(allowed_uplink_items)
-	for(var/datum/uplink_item/uplink_item as anything in allowed_uplink_items)
-		if(uplink_item.cost > 5 && uplink_item.cost <= 20)
-			available_prizes += uplink_item.item
 
 /datum/slotmachine_prize/medium
 	id = "medium"
@@ -93,9 +81,6 @@ GLOBAL_LIST_EMPTY(slotmachine_prizes)
 	say_phrase = "Победитель!"
 	sound = 'sound/goonstation/misc/bell.ogg'
 
-/datum/slotmachine_prize/medium/apply_emagged_effect(obj/machinery/computer/slot_machine/slotmachine, mob/user)
-	slotmachine.give_custom_prize(user, /obj/item/storage/box/random_syndi)
-
 /datum/slotmachine_prize/big
 	id = "big"
 	chance = 0.38
@@ -103,12 +88,6 @@ GLOBAL_LIST_EMPTY(slotmachine_prizes)
 	resultlvl = "green"
 	say_phrase = "Большой победитель!"
 	sound = 'sound/goonstation/misc/klaxon.ogg'
-
-/datum/slotmachine_prize/big/New(list/allowed_uplink_items)
-	..(allowed_uplink_items)
-	for(var/datum/uplink_item/uplink_item as anything in allowed_uplink_items)
-		if(uplink_item.cost >= 30 && uplink_item.cost <= 60)
-			available_prizes += uplink_item.item
 
 /datum/slotmachine_prize/jackpot
 	id = "jackpot"
@@ -124,9 +103,6 @@ GLOBAL_LIST_EMPTY(slotmachine_prizes)
 		message = "Поздравляем [user.name] с выигрышем джекпота в [prize_credits] кредитов!",
 		new_title = "Обладатель джекпота!"
 	)
-
-/datum/slotmachine_prize/jackpot/apply_emagged_effect(obj/machinery/computer/slot_machine/slotmachine, mob/user)
-	slotmachine.give_custom_prize(user, /obj/item/radio/uplink)
 
 /obj/machinery/computer/slot_machine
 	name = "slot machine"

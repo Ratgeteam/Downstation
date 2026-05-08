@@ -32,9 +32,6 @@
 /obj/effect/mech_melee_attack(obj/mecha/M)
 	return 0
 
-/obj/effect/blob_act(obj/structure/blob/B)
-	return
-
 /obj/effect/experience_pressure_difference(flow_x, flow_y)
 	return // Immune to gas flow.
 
@@ -66,10 +63,6 @@
 	icon_state = null
 	armor = list(MELEE = 100, BULLET = 100, LASER = 100, ENERGY = 100, BOMB = 100, BIO = 100, RAD = 100, FIRE = 100, ACID = 100)
 
-// Most of these overrides procs below are overkill, but better safe than sorry.
-/obj/effect/abstract/swarmer_act()
-	return
-
 /obj/effect/abstract/bullet_act(obj/projectile/P)
 	return
 
@@ -92,9 +85,6 @@
 	return
 
 /obj/effect/abstract/ex_act(severity, target)
-	return
-
-/obj/effect/abstract/blob_act()
 	return
 
 /obj/effect/abstract/acid_act()
